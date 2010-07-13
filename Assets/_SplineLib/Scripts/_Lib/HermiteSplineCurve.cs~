@@ -143,7 +143,7 @@ public class HermiteSplineCurve : SplineCurve {
 	
 	public override Vector3 GetVelocity(float time){
 		if (controlPoints.Length==1){
-			return controlPoints[0];
+			return Vector3.zero;
 		}
 		int i =GetSegmentIndex(time);
 		

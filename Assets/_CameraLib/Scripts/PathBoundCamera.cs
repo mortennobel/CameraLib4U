@@ -15,9 +15,10 @@ public class PathBoundCamera : MonoBehaviour, ICamera {
 	/// If the preferred distance between camera and is exceeded, then the camera needs to move
 	/// </summary>
 	public float preferredDistanceToCamera = 2;
-	private float preferredDistanceToCameraSqr;
 	public float currentPositionOnPath = 0;
-	private float cameraVelocity = 0;
+	public float cameraVelocity = 0;
+	public float currentDistanceToTargetDebug=0;
+	public bool endpointDetection = false;
 	
 	
 	/// Physics coefficient which controls the influence of the camera's position
@@ -65,24 +66,32 @@ public class PathBoundCamera : MonoBehaviour, ICamera {
 	
 	public void SetPreferredDistanceToCamera(float d){
 		this.preferredDistanceToCamera = d;
-		this.preferredDistanceToCameraSqr = d*d;
 	}
 	
 	public Vector3 GetCameraTargetPosition(){
+		Vector3 splineVelocity = cameraSplineObject.GetVelocity(currentPositionOnPath);
 		Vector3 distance = transform.position-target.position;
+		if (currentPositionOnPath==0 && Vector3.Dot(distance, splineVelocity)>=0){
+			//  trying to navigate away from endpoint
+			return transform.position;
+		}
 		Debug.DrawLine(transform.position, target.position, Color.red);
-		if (distance.magnitude < preferredDistanceToCamera){
+		currentDistanceToTargetDebug =distance.magnitude;
+		if (distance.sqrMagnitude < preferredDistanceToCamera*preferredDistanceToCamera){
 			// don't move camera, since target is closer than preferredDistanceToCamera
+			endpointDetection =true;
 			return transform.position;
 		} 	
+		endpointDetection =false;
 		
 		// determine search direction
 		distance = distance-(distance.normalized*preferredDistanceToCamera);
-		Vector3 splineVelocity = cameraSplineObject.GetVelocity(currentPositionOnPath);
-		Debug.DrawLine(transform.position, transform.position+splineVelocity.normalized*5, Color.blue);
-		Vector3 estimatedDirection = Vector3.Project(distance.normalized, splineVelocity);
 		
-		float estimatedDelta = estimatedDirection.magnitude;
+		Debug.DrawLine(transform.position, transform.position+splineVelocity.normalized*5, Color.blue);
+		Vector3 estimatedDirection = Vector3.Project(distance, splineVelocity);
+		
+		//float estimatedDelta = estimatedDirection.magnitude;
+		float estimatedDelta = distance.magnitude;
 		float dotProduct = Vector3.Dot(distance,splineVelocity);
 		if (dotProduct>0){
 			estimatedDelta =-estimatedDelta;
@@ -98,7 +107,14 @@ public class PathBoundCamera : MonoBehaviour, ICamera {
 		
 		cameraVelocity = cameraVelocity+springAccel*Time.deltaTime;
 		
-		currentPositionOnPath =currentPositionOnPath+cameraVelocity*Time.deltaTime;
+		currentPositionOnPath = desiredPosition;
+		if (currentPositionOnPath<0){
+			currentPositionOnPath = 0;
+			cameraVelocity =0;
+		} else if (currentPositionOnPath>cameraSplineObject.totalLength){
+			currentPositionOnPath=cameraSplineObject.totalLength;
+			cameraVelocity =0;
+		}
 		
 		return cameraSplineObject.GetPosition(currentPositionOnPath+cameraVelocity*Time.deltaTime);
 	}
@@ -109,6 +125,10 @@ public class PathBoundCamera : MonoBehaviour, ICamera {
 	
 	public Transform GetTarget(){
 		return transform;
+	}
+	
+	public float GetDampingRadio(){
+		return springDamping/(2*Mathf.Sqrt(springStiffness));
 	}
 	
 	public void OnDrawGizmosSelected(){

@@ -132,11 +132,11 @@ public class BezierSplineCurve : SplineCurve {
 	}
 	
 	public override Vector3 GetVelocity(float time){
-		if (time>=this.time[this.time.Length-1]){
-			return controlPoints[controlPoints.Length-1];
+		if (time>this.time[this.time.Length-1]){
+			time = this.time[this.time.Length-1];
 		}
 		else if (time<=this.time[0]){
-			return controlPoints[0];
+			time = this.time[0];
 		}
 		
 		int i = GetSegmentIndex(time);
