@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/mortennobel/CurveLib/svn/!svn/ver/1
+END
+AssemblyInfo.cs
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/mortennobel/CurveLib/svn/!svn/ver/3/AssemblyInfo.cs
+END
+LinearSpline.cs
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/mortennobel/CurveLib/svn/!svn/ver/3/LinearSpline.cs
+END
+HermiteSpline.cs
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/mortennobel/CurveLib/svn/!svn/ver/3/HermiteSpline.cs
+END
+CatmullRomSpline.cs
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/mortennobel/CurveLib/svn/!svn/ver/3/CatmullRomSpline.cs
+END
+ControlPoint.cs
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/mortennobel/CurveLib/svn/!svn/ver/3/ControlPoint.cs
+END
+Spline.cs
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/mortennobel/CurveLib/svn/!svn/ver/3/Spline.cs
+END

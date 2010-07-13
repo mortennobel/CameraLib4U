@@ -1,0 +1,41 @@
+using System;
+using UnityEngine;
+
+
+
+public class BezierSpline : Spline
+{
+	public BezierSpline (Vector3[] positions) : base(positions)
+	{}
+	
+	public override Vector3 GetPosition(float time){
+		int i =0;
+		// interpolate
+		for (;i<nodes.Length-2;i=i+4){
+			if (time<nodes[i+4].time){
+				break;
+			}
+		}
+
+		ControlPoint cp0 = nodes[i];
+		ControlPoint cp1 = nodes[i+1];
+		ControlPoint cp2 = nodes[i+2]; // todo - this might be invalid :-(
+
+		Vector3 p0 = cp0.position;
+		Vector3 p1 = cp1.position;
+		Vector3 p2 = cp2.position;
+		
+		float t0 = cp0.time;
+		float t1 = cp1.time;
+		float u = (time-t0)/(t1-t0);
+
+		float u2 = u*u;
+		float u3 = u2*u;
+		
+		
+		return p0*(.5f*u2-3f/2f*u+1f)+p1*(-u2+2f*u)+p2*(.5f*u2-.5f*u);
+	}
+	
+}
+
+

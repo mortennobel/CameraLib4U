@@ -1,0 +1,23 @@
+using UnityEngine;
+using System.Collections;
+
+public class CompileTest : MonoBehaviour {
+
+	// Use this for initialization
+	void Start () {
+	
+	}
+	
+	// Update is called once per frame
+	void Update () {
+		if (Grow() && false){
+		//Debug.Log(Grow());
+		}
+	}
+	
+	private bool Grow(){
+		Transform transform = this.transform;
+		transform.localScale = transform.localScale*1.01f;
+		return false;
+	}
+}

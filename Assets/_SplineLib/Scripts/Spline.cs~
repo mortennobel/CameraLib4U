@@ -1,0 +1,41 @@
+using System;
+using UnityEngine;
+
+public abstract class Spline
+{
+	protected ControlPoint[] nodes;
+	
+	protected Spline (ControlPoint[] nodes)
+	{
+		this.nodes = new ControlPoint[nodes.Length];
+		Array.Copy(nodes, this.nodes, nodes.Length);
+	}
+	
+	protected Spline (Vector3[] positions)
+	{
+		this.nodes = new ControlPoint[positions.Length];
+		float fraction = 1.0f/(positions.Length-1);
+		Vector3 unused = Vector3.zero;
+		for (int i=0;i<positions.Length;i++){
+			float f = fraction*i;
+			this.nodes[i] = new ControlPoint(positions[i], unused, f);
+		}
+	}
+	
+	public abstract Vector3 GetPosition(float time);
+	
+	public float[] getRenderPoints(){
+		int subDivisions = 3;
+		float[] f = new float[nodes.Length*subDivisions-2];
+		for (int i=0;i<nodes.Length;i++){
+			f[i*subDivisions] = nodes[i].time;
+			if (i<nodes.Length-1){
+				float deltaTime = nodes[i+1].time-nodes[i].time;
+				for (int j=1;j<subDivisions;j++){
+					f[i*3+j] = nodes[i].time+deltaTime*j/(float)subDivisions;
+				}
+			}	
+		}
+		return f;
+	}
+}

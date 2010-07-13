@@ -1,0 +1,19 @@
+using System;
+using UnityEngine;
+
+public struct ControlPoint
+{
+	public Vector3 position;
+	public Vector3 tangent;
+	public float time;
+	
+	
+	public ControlPoint (Vector3 position, Vector3 tangent, float time)
+	{
+		this.position = position;
+		this.tangent = tangent;
+		this.time = time;
+	}
+}
+
+

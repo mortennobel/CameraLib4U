@@ -1,0 +1,12 @@
+using System;
+using UnityEngine;
+
+/*
+// Uniform catmull rom spline
+public class CatmullRomSpline // : Spline
+{
+	public CatmullRomSpline () 
+	{}
+	
+}
+ */

@@ -1,0 +1,66 @@
+using System;
+using UnityEngine;
+using System.Collections.Generic;
+/*
+public class LinearSpline
+{
+	private Vector3[] controlPoints;
+	
+	private float[] time;
+	
+	public LinearSpline ()
+	{}
+	
+	public void Init(Vector3[] controlPoints, float[] time) {
+		if (Debug.isDebugBuild) {
+			if (controlPoints.Length<2){
+				throw new Exception("Minimum number of controlpoints is two");
+			}
+			if (controlPoints.Length!=time.Length){
+				throw new Exception("Length of controlpoints must equal length of time. Was "+controlPoints.Length+" and "+time.Length);
+			}
+		}
+		this.controlPoints = new Vector3[controlPoints.Length];
+		this.time = new float[time.Length];
+		Array.Copy(controlPoints,this.controlPoints,controlPoints.Length);
+		Array.Copy(time,this.time,time.Length);
+	}
+	
+	public int GetSegmentIndex(float time){
+		int i =0;
+		// find two nodes to interpolate between
+		for (;i<this.time.Length-2;i++){
+			
+			if (time<this.time[i+1]){
+				break;
+			}
+		}
+		return i;
+	}
+			
+	public Vector3 GetPosition(float time){
+		int i =GetSegmentIndex(time);
+		float t0 = this.time[i];
+		float t1 = this.time[i+1];
+		float u = (time-t0)/(t1-t0);
+		
+		return controlPoints[i]*(1-u)+controlPoints[i+1]*u;
+	} 
+	
+	public Vector3[] GetControlPoints(){
+		return controlPoints;
+	}
+	
+	/// <summary>
+	/// Note: this only returns the correct direction (for line segments) - may not return the correct length.
+	/// </summary>
+	public Vector3 GetVelocity(float time){
+		int i =GetSegmentIndex(time);
+		return controlPoints[i+1]-controlPoints[i];
+	}
+		
+	public float[] GetTime(){
+		return time;
+	}
+}
+ */
