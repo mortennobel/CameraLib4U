@@ -4,6 +4,8 @@ using System.Collections;
 /// <summary>
 /// Delegames most of the methods all cameras
 /// </summary>
+[AddComponentMenu("CameraLib/Composite Camera")]
+[RequireComponent (typeof (Camera))]
 public class CompositeCamera : ICamera {
 
 	public ICamera[] cameras;

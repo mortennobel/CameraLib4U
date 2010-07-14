@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
 
+[AddComponentMenu("CameraLib/Chase Camera")]
+[RequireComponent (typeof (Camera))]
 public class ChaseCamera : ICamera {
 	public float cameraHeight = 2;
 	public float distance = 3;

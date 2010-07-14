@@ -10,6 +10,8 @@ using System.Collections;
 /// I also assumes that the spline does not collide with the environment (or other parts of the game world).
 /// Note that neither of these assumption may hold in a game with moving objects or dynamic environment.
 /// </summary>
+[AddComponentMenu("CameraLib/Path Bound Camera")]
+[RequireComponent (typeof (Camera))]
 public class PathBoundCamera : ICamera {
 	public SplineComponent cameraSpline;
 	// public SplineComponent targetSpline;
