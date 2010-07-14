@@ -20,9 +20,10 @@ public class PathBoundCamera : ICamera {
 	/// </summary>
 	public float maxDistanceToJumpCut =4;
 	public float currentPositionOnPath = 0;
-	public float cameraVelocity = 0;
-	public float currentDistanceToTargetDebug=0;
 	 
+	public float minTimeBetweenDistancebasedJumpcut =3;
+	private float distanceBasedJumpcutTimer = 0;
+	
 	/// Physics coefficient which controls the influence of the camera's position
     /// over the spring force. The stiffer the spring, the closer it will stay to
     /// the chased object.
@@ -43,7 +44,9 @@ public class PathBoundCamera : ICamera {
 	/// Update is called once per frame
 	/// </summary> 
 	void Update () {
-		//GetCameraTargetPosition();
+		distanceBasedJumpcutTimer += Time.deltaTime;
+		
+		// todo - add spring damping
 		transform.position = GetCameraTargetPosition();
 	}
 	
@@ -67,7 +70,9 @@ public class PathBoundCamera : ICamera {
 			}
 		}
 		transform.position = controlpoints[closestControlPoint];
-		currentPositionOnPath =cameraSplineObject.GetRenderPoints()[closestControlPoint];
+		currentPositionOnPath =cameraSplineObject.time[closestControlPoint];
+		
+		distanceBasedJumpcutTimer = 0;
 	}
 	
 	public void SetPreferredDistanceToCamera(float d){
@@ -81,13 +86,13 @@ public class PathBoundCamera : ICamera {
 			//  trying to navigate away from endpoint
 			return transform.position;
 		}
-		Debug.DrawLine(transform.position, target.position, Color.red);
-		currentDistanceToTargetDebug =distance.magnitude;
-		if (distance.sqrMagnitude < maxDistanceToTarget*maxDistanceToTarget){
+		
+		if (distance.sqrMagnitude <= maxDistanceToTarget*maxDistanceToTarget){
 			// don't move camera, since target is closer than preferredDistanceToCamera
 			return transform.position;
 		} 	
-		if (distance.sqrMagnitude > maxDistanceToJumpCut*maxDistanceToJumpCut){
+		if (distance.sqrMagnitude > maxDistanceToJumpCut*maxDistanceToJumpCut && 
+		    distanceBasedJumpcutTimer > minTimeBetweenDistancebasedJumpcut){
 			// jump cut
 			JumpCutToClosestControlPoint();
 			return transform.position;
@@ -96,18 +101,11 @@ public class PathBoundCamera : ICamera {
 		// determine search direction
 		distance = distance-(distance.normalized*maxDistanceToTarget);
 		
-		Debug.DrawLine(transform.position, transform.position+splineVelocity.normalized*5, Color.blue);
-		Vector3 estimatedDirection = Vector3.Project(distance, splineVelocity);
-		
-		//float estimatedDelta = estimatedDirection.magnitude;
 		float estimatedDelta = distance.magnitude;
 		float dotProduct = Vector3.Dot(distance,splineVelocity);
 		
 		if (dotProduct>0){
 			estimatedDelta =-estimatedDelta;
-			Debug.DrawLine(transform.position, transform.position+estimatedDirection, Color.white);  
-		} else {
-			Debug.DrawLine(transform.position, transform.position+estimatedDirection, Color.red);  
 		}
 		
 		float desiredPosition = currentPositionOnPath+estimatedDelta;
@@ -117,15 +115,7 @@ public class PathBoundCamera : ICamera {
 		Vector3 newDistance = cameraSplineObject.GetPosition(desiredPosition)-target.position;
 		float newDotProduct = Vector3.Dot(newSplineVelocity, newDistance);
 		if (newDotProduct>0==dotProduct>0){
-			currentPositionOnPath = desiredPosition;
-			
-			if (currentPositionOnPath<0){
-				currentPositionOnPath = 0;
-				cameraVelocity = 0;
-			} else if (currentPositionOnPath>cameraSplineObject.totalLength){
-				currentPositionOnPath=cameraSplineObject.totalLength;
-				cameraVelocity = 0;
-			}
+			currentPositionOnPath = Mathf.Clamp(desiredPosition,0,cameraSplineObject.totalLength);;
 		}
 		return cameraSplineObject.GetPosition(currentPositionOnPath);
 	}
