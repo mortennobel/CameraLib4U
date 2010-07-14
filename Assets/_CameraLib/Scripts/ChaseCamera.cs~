@@ -1,8 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class ChaseCamera : MonoBehaviour,ICamera {
-	public Transform target;
+public class ChaseCamera : ICamera {
 	public float cameraHeight = 2;
 	public float distance = 3;
 	// private float distanceSqr = 9;
@@ -65,7 +64,7 @@ public class ChaseCamera : MonoBehaviour,ICamera {
 		}
 	}
 	
-	public void InitCamera(){
+	public override void InitCamera(){
 		// unused
 	}
 	
@@ -115,7 +114,7 @@ public class ChaseCamera : MonoBehaviour,ICamera {
 	/**
 	 * This is the optimal camera position that the camera moves towards
 	 */
-	public Vector3 GetCameraTargetPosition(){
+	public override Vector3 GetCameraTargetPosition(){
 		if (target==null){
 			return transform.position;
 		}
@@ -153,7 +152,7 @@ public class ChaseCamera : MonoBehaviour,ICamera {
 		
 	}
 	
-	public void SetTarget(Transform transform){
+	public override void SetTarget(Transform transform){
 		this.target = transform;
 		for (int i=0;i<velocityAccuracy;i++){
 			if (target!=null){
@@ -162,7 +161,7 @@ public class ChaseCamera : MonoBehaviour,ICamera {
 		}
 	}
 	
-	public Transform GetTarget(){
+	public override Transform GetTarget(){
 		return target;
 	}
 	

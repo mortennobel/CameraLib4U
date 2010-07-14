@@ -1,10 +1,23 @@
 using UnityEngine;
 using System.Collections;
 
-public interface ICamera {
-	Vector3 GetCameraTargetPosition();
+public class ICamera :MonoBehaviour{
+	public Transform target;
+
 	
-	void SetTarget(Transform transform);
-	Transform GetTarget();
-	void InitCamera();
+	public virtual Vector3 GetCameraTargetPosition(){
+		return Vector3.zero;
+	}
+	
+	public virtual void SetTarget(Transform transform){
+		
+	}
+	
+	public virtual Transform GetTarget(){
+		return null;
+	}
+	
+	public virtual void InitCamera(){
+		
+	}
 }

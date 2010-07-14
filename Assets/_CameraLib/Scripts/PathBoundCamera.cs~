@@ -5,31 +5,29 @@ using System.Collections;
  * The camera will track the object, but it's 
  * movement is bound to the spline curve
  */
-public class PathBoundCamera : MonoBehaviour, ICamera {
+public class PathBoundCamera : ICamera {
 	public SplineComponent cameraSpline;
 	// public SplineComponent targetSpline;
-	public Transform target;
 	private SplineCurve cameraSplineObject;
 	
 	/// <summary>
 	/// If the preferred distance between camera and is exceeded, then the camera needs to move
 	/// </summary>
-	public float preferredDistanceToCamera = 2;
+	public float maxDistanceToTarget = 2;
+	public float maxDistanceToJumpCut =4;
 	public float currentPositionOnPath = 0;
 	public float cameraVelocity = 0;
 	public float currentDistanceToTargetDebug=0;
-	public bool endpointDetection = false;
-	
 	
 	/// Physics coefficient which controls the influence of the camera's position
     /// over the spring force. The stiffer the spring, the closer it will stay to
     /// the chased object.
     /// Also known as SpringConstant
-    public float springStiffness = 36.0f;
+    private float springStiffness = 36.0f;
 
     /// Physics coefficient which approximates internal friction of the spring.
     /// Sufficient damping will prevent the spring from oscillating infinitely.
-    public float springDamping = 12.0f;
+    private float springDamping = 12.0f;
 	
 	// Use this for initialization
 	void Start () {
@@ -48,7 +46,7 @@ public class PathBoundCamera : MonoBehaviour, ICamera {
 	/// <summary>
 	/// Set the camera on on the controlpoint closest to the player
 	/// </summary>
-	public void InitCamera(){
+	public override void InitCamera(){
 		Vector3[] controlpoints =cameraSplineObject.controlPoints;
 		float minDistance = float.MaxValue;
 		
@@ -65,10 +63,10 @@ public class PathBoundCamera : MonoBehaviour, ICamera {
 	}
 	
 	public void SetPreferredDistanceToCamera(float d){
-		this.preferredDistanceToCamera = d;
+		this.maxDistanceToTarget = d;
 	}
 	
-	public Vector3 GetCameraTargetPosition(){
+	public override Vector3 GetCameraTargetPosition(){
 		Vector3 splineVelocity = cameraSplineObject.GetVelocity(currentPositionOnPath);
 		Vector3 distance = transform.position-target.position;
 		if (currentPositionOnPath==0 && Vector3.Dot(distance, splineVelocity)>=0){
@@ -77,15 +75,13 @@ public class PathBoundCamera : MonoBehaviour, ICamera {
 		}
 		Debug.DrawLine(transform.position, target.position, Color.red);
 		currentDistanceToTargetDebug =distance.magnitude;
-		if (distance.sqrMagnitude < preferredDistanceToCamera*preferredDistanceToCamera){
+		if (distance.sqrMagnitude < maxDistanceToTarget*maxDistanceToTarget){
 			// don't move camera, since target is closer than preferredDistanceToCamera
-			endpointDetection =true;
 			return transform.position;
 		} 	
-		endpointDetection =false;
 		
 		// determine search direction
-		distance = distance-(distance.normalized*preferredDistanceToCamera);
+		distance = distance-(distance.normalized*maxDistanceToTarget);
 		
 		Debug.DrawLine(transform.position, transform.position+splineVelocity.normalized*5, Color.blue);
 		Vector3 estimatedDirection = Vector3.Project(distance, splineVelocity);
@@ -93,6 +89,7 @@ public class PathBoundCamera : MonoBehaviour, ICamera {
 		//float estimatedDelta = estimatedDirection.magnitude;
 		float estimatedDelta = distance.magnitude;
 		float dotProduct = Vector3.Dot(distance,splineVelocity);
+		
 		if (dotProduct>0){
 			estimatedDelta =-estimatedDelta;
 			Debug.DrawLine(transform.position, transform.position+estimatedDirection, Color.white);  
@@ -101,29 +98,30 @@ public class PathBoundCamera : MonoBehaviour, ICamera {
 		}
 		
 		float desiredPosition = currentPositionOnPath+estimatedDelta;
-		    
-		float displace = currentPositionOnPath - desiredPosition;
-		float springAccel =(-springStiffness*displace)-(springDamping*cameraVelocity);
 		
-		cameraVelocity = cameraVelocity+springAccel*Time.deltaTime;
-		
-		currentPositionOnPath = desiredPosition;
-		if (currentPositionOnPath<0){
-			currentPositionOnPath = 0;
-			cameraVelocity =0;
-		} else if (currentPositionOnPath>cameraSplineObject.totalLength){
-			currentPositionOnPath=cameraSplineObject.totalLength;
-			cameraVelocity =0;
+		// make sure if the desired position will not pull the camera backwards
+		Vector3 newSplineVelocity = cameraSplineObject.GetVelocity(desiredPosition);
+		Vector3 newDistance = cameraSplineObject.GetPosition(desiredPosition)-target.position;
+		float newDotProduct = Vector3.Dot(newSplineVelocity, newDistance);
+		if (newDotProduct>0==dotProduct>0){
+			currentPositionOnPath = desiredPosition;
+			
+			if (currentPositionOnPath<0){
+				currentPositionOnPath = 0;
+				cameraVelocity = 0;
+			} else if (currentPositionOnPath>cameraSplineObject.totalLength){
+				currentPositionOnPath=cameraSplineObject.totalLength;
+				cameraVelocity = 0;
+			}
 		}
-		
-		return cameraSplineObject.GetPosition(currentPositionOnPath+cameraVelocity*Time.deltaTime);
+		return cameraSplineObject.GetPosition(currentPositionOnPath);
 	}
 	
-	public void SetTarget(Transform target){
+	public override void SetTarget(Transform target){
 		this.target = target;
 	}
 	
-	public Transform GetTarget(){
+	public override Transform GetTarget(){
 		return transform;
 	}
 	

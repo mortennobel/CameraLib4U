@@ -1,45 +1,56 @@
 using UnityEngine;
 using System.Collections;
 
-public class CompositeCamera : MonoBehaviour, ICamera {
+/// <summary>
+/// Delegames most of the methods all cameras
+/// </summary>
+public class CompositeCamera : ICamera {
 
 	public ICamera[] cameras;
 	public int currentCamera = 0;
-	public Transform target;
+	public int lastCamera = -1;
 	
-	public Vector3 GetCameraTargetPosition(){
+	public override Vector3 GetCameraTargetPosition(){
+		// not used here
 		return Vector3.zero;
 	}
 	
-	public void SetTarget(Transform target){
+	public override void SetTarget(Transform target){
 		this.target = target;
+		cameras[currentCamera].SetTarget(target);
 	}
 	
-	public Transform GetTarget(){
-		return target;
+	public override Transform GetTarget(){
+		return null;
 	}
 	
-	public void InitCamera(){
-		// unused
-		Debug.Log("Init camera");
+	public override void InitCamera(){
+		// do nothing
 	}
 	
 	/**
 	 * setCamera
 	 */
 	public void SetCamera(int i){
+		cameras[currentCamera].enabled = false;
+		currentCamera = i;
+		cameras[currentCamera].SetTarget(target);
+		cameras[currentCamera].enabled = true;
+		cameras[currentCamera].InitCamera();
 		
 	}
 	
 	// Use this for initialization
 	void Start () {
-	
+		for (int i=0;i<cameras.Length;i++){
+			if (cameras[i]!=null){
+				cameras[i].enabled = currentCamera==i;
+			}
+		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
-	
+		
 	}
-	
-	
 }
