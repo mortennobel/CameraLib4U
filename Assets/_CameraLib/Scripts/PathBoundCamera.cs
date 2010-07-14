@@ -1,10 +1,15 @@
 using UnityEngine;
 using System.Collections;
 
-/**
- * The camera will track the object, but it's 
- * movement is bound to the spline curve
- */
+/// <summary>
+/// The camera will track the object, but it's movement is bound to the spline curve.
+///  
+/// Assumptions:
+/// I assume that the camera can see the player from the spline given the maxDistance-parameter. This means that I 
+/// do not do any visibility check.
+/// I also assumes that the spline does not collide with the environment (or other parts of the game world).
+/// Note that neither of these assumption may hold in a game with moving objects or dynamic environment.
+/// </summary>
 public class PathBoundCamera : ICamera {
 	public SplineComponent cameraSpline;
 	// public SplineComponent targetSpline;
@@ -19,20 +24,15 @@ public class PathBoundCamera : ICamera {
 	/// closest control-point and position itself there
 	/// </summary>
 	public float maxDistanceToJumpCut =4;
-	public float currentPositionOnPath = 0;
+	private float currentPositionOnPath = 0;
 	 
 	public float minTimeBetweenDistancebasedJumpcut =3;
 	private float distanceBasedJumpcutTimer = 0;
 	
-	/// Physics coefficient which controls the influence of the camera's position
-    /// over the spring force. The stiffer the spring, the closer it will stay to
-    /// the chased object.
-    /// Also known as SpringConstant
-    private float springStiffness = 36.0f;
-
-    /// Physics coefficient which approximates internal friction of the spring.
-    /// Sufficient damping will prevent the spring from oscillating infinitely.
-    private float springDamping = 12.0f;
+	
+	public bool dampingEnabled = true;
+	public float dampingConstant = 1f;
+	private Vector3 desiredPosition;
 	
 	// Use this for initialization
 	void Start () {
@@ -46,8 +46,12 @@ public class PathBoundCamera : ICamera {
 	void Update () {
 		distanceBasedJumpcutTimer += Time.deltaTime;
 		
-		// todo - add spring damping
-		transform.position = GetCameraTargetPosition();
+		desiredPosition = GetCameraTargetPosition();
+		if (dampingEnabled){
+			transform.position = Vector3.Lerp(transform.position,desiredPosition,dampingConstant*Time.deltaTime);
+		} else {
+			transform.position = desiredPosition;
+		}
 	}
 	
 	/// <summary>
@@ -56,7 +60,10 @@ public class PathBoundCamera : ICamera {
 	public override void InitCamera(){
 		JumpCutToClosestControlPoint();
 	}
-
+	
+	/// <summary>
+	/// Search for the control point closest to the player and jump cut to that position 
+	/// </summary>
 	private void JumpCutToClosestControlPoint(){
 		Vector3[] controlpoints =cameraSplineObject.controlPoints;
 		float minDistance = float.MaxValue;
@@ -70,6 +77,7 @@ public class PathBoundCamera : ICamera {
 			}
 		}
 		transform.position = controlpoints[closestControlPoint];
+		desiredPosition = transform.position;
 		currentPositionOnPath =cameraSplineObject.time[closestControlPoint];
 		
 		distanceBasedJumpcutTimer = 0;
@@ -81,22 +89,20 @@ public class PathBoundCamera : ICamera {
 	
 	public override Vector3 GetCameraTargetPosition(){
 		Vector3 splineVelocity = cameraSplineObject.GetVelocity(currentPositionOnPath);
-		Vector3 distance = transform.position-target.position;
-		if (currentPositionOnPath==0 && Vector3.Dot(distance, splineVelocity)>=0){
-			//  trying to navigate away from endpoint
-			return transform.position;
-		}
+		Vector3 distance = desiredPosition-target.position;
 		
 		if (distance.sqrMagnitude <= maxDistanceToTarget*maxDistanceToTarget){
 			// don't move camera, since target is closer than preferredDistanceToCamera
-			return transform.position;
+			return desiredPosition;
 		} 	
+		
 		if (distance.sqrMagnitude > maxDistanceToJumpCut*maxDistanceToJumpCut && 
 		    distanceBasedJumpcutTimer > minTimeBetweenDistancebasedJumpcut){
 			// jump cut
 			JumpCutToClosestControlPoint();
-			return transform.position;
+			return desiredPosition;
 		}
+		
 		
 		// determine search direction
 		distance = distance-(distance.normalized*maxDistanceToTarget);
@@ -108,14 +114,14 @@ public class PathBoundCamera : ICamera {
 			estimatedDelta =-estimatedDelta;
 		}
 		
-		float desiredPosition = currentPositionOnPath+estimatedDelta;
+		float desiredPositionOnSpline = currentPositionOnPath+estimatedDelta;
 		
 		// make sure if the desired position will not pull the camera backwards
-		Vector3 newSplineVelocity = cameraSplineObject.GetVelocity(desiredPosition);
-		Vector3 newDistance = cameraSplineObject.GetPosition(desiredPosition)-target.position;
+		Vector3 newSplineVelocity = cameraSplineObject.GetVelocity(desiredPositionOnSpline);
+		Vector3 newDistance = cameraSplineObject.GetPosition(desiredPositionOnSpline)-target.position;
 		float newDotProduct = Vector3.Dot(newSplineVelocity, newDistance);
 		if (newDotProduct>0==dotProduct>0){
-			currentPositionOnPath = Mathf.Clamp(desiredPosition,0,cameraSplineObject.totalLength);;
+			currentPositionOnPath = Mathf.Clamp(desiredPositionOnSpline,0,cameraSplineObject.totalLength);;
 		}
 		return cameraSplineObject.GetPosition(currentPositionOnPath);
 	}
@@ -128,12 +134,8 @@ public class PathBoundCamera : ICamera {
 		return transform;
 	}
 	
-	public float GetDampingRadio(){
-		return springDamping/(2*Mathf.Sqrt(springStiffness));
-	}
-	
 	public void OnDrawGizmosSelected(){
 		Gizmos.color = Color.white;
-    	Gizmos.DrawWireSphere (transform.position, 0.2f);
+    	Gizmos.DrawWireSphere (desiredPosition, 0.2f);
 	}
 }
