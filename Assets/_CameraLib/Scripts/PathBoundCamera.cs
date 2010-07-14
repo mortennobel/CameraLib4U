@@ -14,11 +14,15 @@ public class PathBoundCamera : ICamera {
 	/// If the preferred distance between camera and is exceeded, then the camera needs to move
 	/// </summary>
 	public float maxDistanceToTarget = 2;
+	/// <summary>
+	/// if the distance between camera and target is 'too large' the camera will search the full path for the 
+	/// closest control-point and position itself there
+	/// </summary>
 	public float maxDistanceToJumpCut =4;
 	public float currentPositionOnPath = 0;
 	public float cameraVelocity = 0;
 	public float currentDistanceToTargetDebug=0;
-	
+	 
 	/// Physics coefficient which controls the influence of the camera's position
     /// over the spring force. The stiffer the spring, the closer it will stay to
     /// the chased object.
@@ -47,6 +51,10 @@ public class PathBoundCamera : ICamera {
 	/// Set the camera on on the controlpoint closest to the player
 	/// </summary>
 	public override void InitCamera(){
+		JumpCutToClosestControlPoint();
+	}
+
+	private void JumpCutToClosestControlPoint(){
 		Vector3[] controlpoints =cameraSplineObject.controlPoints;
 		float minDistance = float.MaxValue;
 		
@@ -79,6 +87,11 @@ public class PathBoundCamera : ICamera {
 			// don't move camera, since target is closer than preferredDistanceToCamera
 			return transform.position;
 		} 	
+		if (distance.sqrMagnitude > maxDistanceToJumpCut*maxDistanceToJumpCut){
+			// jump cut
+			JumpCutToClosestControlPoint();
+			return transform.position;
+		}
 		
 		// determine search direction
 		distance = distance-(distance.normalized*maxDistanceToTarget);
