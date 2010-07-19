@@ -27,6 +27,7 @@ public class SimpleCharacterController : MonoBehaviour {
         	// move direction directly from axes
         	moveDirection.z = Input.GetAxis("Vertical")* Time.deltaTime*speed*(flipCharacter?-1:1);
 			moveDirection = transform.TransformDirection(moveDirection);
+			
     	}
 
     	// Apply gravity

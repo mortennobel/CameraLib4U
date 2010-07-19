@@ -12,7 +12,7 @@ public class BerzierSplineCurve : UUnitTestCase {
 		};
 		BezierSplineCurve bezier = new BezierSplineCurve();
 		bezier.Init(p1); 
-		float totalLength = bezier.totalLength;
+		float totalLength = bezier.totalTime;
 		Assert.True(totalLength>1 && totalLength<2,"");
 	}
 	
@@ -28,7 +28,7 @@ public class BerzierSplineCurve : UUnitTestCase {
 		};
 		BezierSplineCurve bezier = new BezierSplineCurve();
 		bezier.Init(p1,aproxPoints); 
-		float totalLength = bezier.totalLength;
+		float totalLength = bezier.totalTime;
 		Assert.True(totalLength>1 && totalLength<2,"");
 	}
 	
@@ -47,7 +47,7 @@ public class BerzierSplineCurve : UUnitTestCase {
 		};
 		BezierSplineCurve bezier = new BezierSplineCurve();
 		bezier.Init(p1,aproxPoints); 
-		float totalLength = bezier.totalLength;
+		float totalLength = bezier.totalTime;
 		Assert.Equals(1f+2f, totalLength,"");
 	}
 	
@@ -71,7 +71,7 @@ public class BerzierSplineCurve : UUnitTestCase {
 		BezierSplineCurve bezier = new BezierSplineCurve();
 		bezier.Init(p1); 
 		Assert.Equals((p1.Length-1)/3+1, bezier.time.Length);
-		float totalLength = bezier.totalLength;
+		float totalLength = bezier.totalTime;
 		
 		float linearLength = 0;
 		for (int i=0;i<p1.Length-1;i=i+3){

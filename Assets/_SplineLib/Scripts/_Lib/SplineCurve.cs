@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 
 public abstract class SplineCurve {
-	private float[] mLength;
+	private float[] mTime;
 	private Vector3[] mControlPoints;
 	public float lengthPrecision = 0.005f;
 	public List<float> renderPoints = new List<float>();
@@ -21,16 +21,16 @@ public abstract class SplineCurve {
 	
 	public float[] time{
 		get{
-			return mLength;
+			return mTime;
 		}
 		protected set{
-			this.mLength =value;
+			this.mTime =value;
 		}
 	}
 	
-	public float totalLength{
+	public float totalTime{
 		get{
-			return mLength[mLength.Length-1];
+			return mTime[mTime.Length-1];
 		}
 	}
 	
@@ -46,13 +46,13 @@ public abstract class SplineCurve {
 	}
 	
 	public float[] GetRenderPoints(){
-		if (mLength.Length==0){
+		if (mTime.Length==0){
 			return new float[0];
 		}
 		if (renderPoints.Count==0){
 			renderPoints.Add(0f);
-			for (int i=0;i<mLength.Length-1;i++){
-				calcRenderPoints(mLength[i], mLength[i+1], 0, MAX_RECURSION_DEPTH);
+			for (int i=0;i<mTime.Length-1;i++){
+				calcRenderPoints(mTime[i], mTime[i+1], 0, MAX_RECURSION_DEPTH);
 			}
 		}
 		return renderPoints.ToArray();
@@ -73,17 +73,17 @@ public abstract class SplineCurve {
 	
 	protected void calculateSegmentLength(){
 		renderPoints.Clear();
-		mLength[0] = 0;
-		mLength[mLength.Length-1] = int.MaxValue;
+		mTime[0] = 0;
+		mTime[mTime.Length-1] = int.MaxValue;
 		
-		for (int i=0;i<mLength.Length-1;i++){
+		for (int i=0;i<mTime.Length-1;i++){
 			// set value i+1 greater than i
-			float newValue = (mLength[i]+1)*2;
-			mLength[i+1] = newValue;
+			float newValue = (mTime[i]+1)*2;
+			mTime[i+1] = newValue;
 			
 			// compute length
-			float calculatedLength = SegmentArcLength(mLength[i], newValue,0, MAX_RECURSION_DEPTH);
-			mLength[i+1] = mLength[i]+calculatedLength;
+			float calculatedLength = SegmentArcLength(mTime[i], newValue,0, MAX_RECURSION_DEPTH);
+			mTime[i+1] = mTime[i]+calculatedLength;
 		}
 	}
 	

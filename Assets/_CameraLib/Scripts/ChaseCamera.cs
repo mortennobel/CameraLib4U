@@ -49,17 +49,10 @@ public class ChaseCamera : ICamera {
 	} 
 	
 	// Update is called once per frame
-	public override void UpdateCameraPosition () {
-		
+	public override void UpdateCameraPosition () {	
 		Vector3 desiredPosition = GetCameraTargetPosition();
 		if (springSmoothingEnabled){
-			Vector3 position = transform.position;
-	        
-			Vector3 displace = position - desiredPosition;
-			Vector3 springAccel =(-springStiffness*displace)-(springDamping*velocity);
-			
-			velocity = velocity+springAccel*Time.deltaTime;
-			transform.position = transform.position+velocity*Time.deltaTime;
+			transform.position = Damping.SpringDamping(transform.position,desiredPosition,ref velocity,springStiffness, springDamping); 
 		} else {
 			transform.position = desiredPosition;
 		}
@@ -139,13 +132,15 @@ public class ChaseCamera : ICamera {
 			// draw circle to illustrate distance to target
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawWireSphere (transform.position, distance);
+			
+			// draw velocity of camera
+			Gizmos.color = Color.blue;
+			Gizmos.DrawLine(target.position, target.position+GetTargetVelocity());	
 		}
 		// draw velocity of camera
 		Gizmos.color = Color.red;
 		Gizmos.DrawLine(transform.position, transform.position+GetCameraVelocity());	
-		// draw velocity of camera
-		Gizmos.color = Color.blue;
-		Gizmos.DrawLine(target.position, target.position+GetTargetVelocity());	
+		
 		
 	}
 	
@@ -161,9 +156,4 @@ public class ChaseCamera : ICamera {
 	public override Transform GetTarget(){
 		return target;
 	}
-	
-	public float GetDampingRatio(){
-		return springDamping/(2*Mathf.Sqrt(springStiffness));
-	}
-	
 }

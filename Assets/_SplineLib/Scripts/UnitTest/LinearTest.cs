@@ -14,14 +14,14 @@ public class LinearTest : UUnitTestCase {
 		lp.Init(p1);
 		
 		Vector3 expectedResult = new Vector3(.5f, 1, 1.5f);
-		Assert.Equals(expectedResult,lp.GetPosition(0.5f*lp.totalLength));
+		Assert.Equals(expectedResult,lp.GetPosition(0.5f*lp.totalTime));
 		
 		expectedResult = new Vector3(.25f, .5f, 0.75f);
-		Assert.Equals(expectedResult,lp.GetPosition(0.25f*lp.totalLength));	
+		Assert.Equals(expectedResult,lp.GetPosition(0.25f*lp.totalTime));	
 		
 		// test start and end conditions
 		Assert.Equals(p1[0],lp.GetPosition(0.0f));	
-		Assert.Equals(p1[1],lp.GetPosition(lp.totalLength));	
+		Assert.Equals(p1[1],lp.GetPosition(lp.totalTime));	
 	}
 		
 	public void TestLinearPathExplicitDistances ()
@@ -42,7 +42,7 @@ public class LinearTest : UUnitTestCase {
 		// test start and end conditions
 		Assert.Equals(Vector3.zero,lp.GetPosition(0.0f));
 		Vector3 endpoint = new Vector3(1,2,1);
-		Assert.Equals(endpoint,lp.GetPosition(lp.totalLength));
+		Assert.Equals(endpoint,lp.GetPosition(lp.totalTime));
 	}		
 	
 	public void TestLength(){
@@ -52,7 +52,7 @@ public class LinearTest : UUnitTestCase {
 		};
 		LinearSplineCurve lp = new LinearSplineCurve();
 		lp.Init(p1);
-		Assert.Equals(1.0f, lp.totalLength);
+		Assert.Equals(1.0f, lp.totalTime);
 		
 		Vector3[] p2 = {
 			new Vector3(0,0,0),
@@ -60,7 +60,7 @@ public class LinearTest : UUnitTestCase {
 		};
 		lp = new LinearSplineCurve();
 		lp.Init(p2);
-		Assert.Equals(p2[1].magnitude, lp.totalLength);
+		Assert.Equals(p2[1].magnitude, lp.totalTime);
 	}
 	
 	public void TestLengthConCat1(){
@@ -71,7 +71,7 @@ public class LinearTest : UUnitTestCase {
 		};
 		LinearSplineCurve lp = new LinearSplineCurve();
 		lp.Init(p1);
-		Assert.Equals(2, lp.totalLength);
+		Assert.Equals(2, lp.totalTime);
 	}
 	
 	public void TestLengthConCat2(){
@@ -84,7 +84,7 @@ public class LinearTest : UUnitTestCase {
 		};
 		LinearSplineCurve lp = new LinearSplineCurve();
 		lp.Init(p2);
-		Assert.Equals(p2[1].magnitude+1+3, lp.totalLength);
+		Assert.Equals(p2[1].magnitude+1+3, lp.totalTime);
 	}
 	
 	public void TestRenderPoints(){

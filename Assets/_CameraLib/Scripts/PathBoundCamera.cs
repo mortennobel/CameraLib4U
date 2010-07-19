@@ -32,9 +32,20 @@ public class PathBoundCamera : ICamera {
 	private float distanceBasedJumpcutTimer = 0;
 	
 	
-	public bool dampingEnabled = true;
-	public float dampingConstant = 1f;
+	public bool springSmoothingEnabled = true; 
+	
+	/// Physics coefficient which controls the influence of the camera's position
+    /// over the spring force. The stiffer the spring, the closer it will stay to
+    /// the chased object.
+    /// Also known as SpringConstant
+    public float springStiffness = 36.0f;
+
+    /// Physics coefficient which approximates internal friction of the spring.
+    /// Sufficient damping will prevent the spring from oscillating infinitely.
+    public float springDamping = 12.0f;
+
 	private Vector3 desiredPosition;
+	private Vector3 velocity = Vector3.zero;
 	
 	// Use this for initialization
 	void Start () {
@@ -48,8 +59,8 @@ public class PathBoundCamera : ICamera {
 	public override void UpdateCameraPosition () {
 		distanceBasedJumpcutTimer += Time.deltaTime;
 		desiredPosition = GetCameraTargetPosition();
-		if (dampingEnabled){
-			transform.position = Vector3.Lerp(transform.position,desiredPosition,dampingConstant*Time.deltaTime);
+		if (springSmoothingEnabled){
+			transform.position = Damping.SpringDamping(transform.position,desiredPosition, ref velocity, springStiffness, springDamping);
 		} else {
 			transform.position = desiredPosition;
 		}
@@ -122,7 +133,7 @@ public class PathBoundCamera : ICamera {
 		Vector3 newDistance = cameraSplineObject.GetPosition(desiredPositionOnSpline)-target.position;
 		float newDotProduct = Vector3.Dot(newSplineVelocity, newDistance);
 		if (newDotProduct>0==dotProduct>0){
-			currentPositionOnPath = Mathf.Clamp(desiredPositionOnSpline,0,cameraSplineObject.totalLength);;
+			currentPositionOnPath = Mathf.Clamp(desiredPositionOnSpline,0,cameraSplineObject.totalTime);
 		}
 		return cameraSplineObject.GetPosition(currentPositionOnPath);
 	}
