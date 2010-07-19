@@ -45,9 +45,8 @@ public class PathBoundCamera : ICamera {
 	/// <summary>
 	/// Update is called once per frame
 	/// </summary> 
-	void Update () {
+	public override void UpdateCameraPosition () {
 		distanceBasedJumpcutTimer += Time.deltaTime;
-		
 		desiredPosition = GetCameraTargetPosition();
 		if (dampingEnabled){
 			transform.position = Vector3.Lerp(transform.position,desiredPosition,dampingConstant*Time.deltaTime);

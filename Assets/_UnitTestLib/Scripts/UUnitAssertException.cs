@@ -14,13 +14,21 @@ public class UUnitAssertException : Exception {
 	
 	
 	public object actual {
-		get;
-		set;
+		get{
+			return actual;
+		}
+		set{
+			actual =value;
+		}
 	}
 	
 	public object expected {
-		get;
-		set;
+		get{
+			return expected;
+		}
+		set{
+			expected =value;
+		}
 	}
 	
 	public string Details(){

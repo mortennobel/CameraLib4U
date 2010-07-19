@@ -110,7 +110,7 @@ public class SplineComponent : MonoBehaviour {
 		}
 		Debug.Log(debug);
 		
-		// todo only call when updates
+		// todo only call when updates 
 		if (!updated || spline ==null){
 			DoUpdateSpline();
 		}
@@ -126,6 +126,22 @@ public class SplineComponent : MonoBehaviour {
 			Gizmos.color = splineColor;
 			Gizmos.DrawLine(vs[i-1],vs[i]);
 		}	
+	}
+	
+	/// <summary>
+	/// Returns the number of controlpoints for each segment.
+	/// </summary>
+	public int GetControlPointsPerSegment(){
+		switch (splineType){
+			case SplineType.LinearSpline:
+			case SplineType.HermiteSpline:
+			return 2;
+		case SplineType.BezierSpline:
+			return 4;
+		case SplineType.BezierSmoothSpline:
+		default:
+			return 3;	
+		}
 	}
 	
 	public void OnDrawGizmos(){

@@ -6,7 +6,6 @@ using System.Collections;
 public class ChaseCamera : ICamera {
 	public float cameraHeight = 2;
 	public float distance = 3;
-	// private float distanceSqr = 9;
 	
 	private Vector3 lastCameraTargetPosition = Vector3.zero;
 	
@@ -50,7 +49,7 @@ public class ChaseCamera : ICamera {
 	} 
 	
 	// Update is called once per frame
-	void Update () {
+	public override void UpdateCameraPosition () {
 		
 		Vector3 desiredPosition = GetCameraTargetPosition();
 		if (springSmoothingEnabled){
@@ -64,15 +63,11 @@ public class ChaseCamera : ICamera {
 		} else {
 			transform.position = desiredPosition;
 		}
+		UpdateVelocity();
 	}
 	
 	public override void InitCamera(){
 		// unused
-	}
-	
-	void LateUpdate(){
-		UpdateVelocity();
-		
 	}
 	
 	// store the current positions into an array

@@ -52,7 +52,7 @@ public class CompositeCamera : ICamera {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	public override void UpdateCameraPosition () {
 		
 	}
 }
