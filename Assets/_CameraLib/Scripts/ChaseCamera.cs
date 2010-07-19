@@ -162,7 +162,7 @@ public class ChaseCamera : ICamera {
 		return target;
 	}
 	
-	public float GetDampingRadio(){
+	public float GetDampingRatio(){
 		return springDamping/(2*Mathf.Sqrt(springStiffness));
 	}
 	
