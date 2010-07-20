@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class SplineComponent : MonoBehaviour {
 	
-	public enum SplineType { LinearSpline,BezierSpline,BezierSmoothSpline, HermiteSpline, KochanekBartel };
+	public enum SplineType { LinearSpline,BezierSpline,BezierSmoothSpline, CatmullRom, KochanekBartel };
 	
 	public SplineType splineType = SplineType.LinearSpline;
 	public SplineCurve spline;
@@ -15,6 +15,10 @@ public class SplineComponent : MonoBehaviour {
 	
 	public float sphereRadius = 0.1f;
 	public float lengthPrecision =0.001f;
+	
+	public float bias = 0f;
+	public float tension = 0f;
+	public float continuity = 0f;
 	
 	private bool updated = false;
 
@@ -73,11 +77,11 @@ public class SplineComponent : MonoBehaviour {
 			lSpline.Init(controlPoints.ToArray());
 			}
 			break;
-		case SplineType.HermiteSpline:{
+		case SplineType.CatmullRom:{
 			HermiteSplineCurve hSpline = new HermiteSplineCurve();
 			spline = hSpline;
 			spline.lengthPrecision =lengthPrecision;
-			hSpline.InitNatural(controlPoints.ToArray());
+			hSpline.InitKochanekBartel(controlPoints.ToArray(),0f,0f,0f);
 			}
 			break;
 		case SplineType.KochanekBartel:
@@ -85,7 +89,7 @@ public class SplineComponent : MonoBehaviour {
 			HermiteSplineCurve hSpline = new HermiteSplineCurve();
 			spline = hSpline;
 			spline.lengthPrecision =lengthPrecision;
-			hSpline.InitKochanekBartel(controlPoints.ToArray(),0f,0f,0f);	
+			hSpline.InitKochanekBartel(controlPoints.ToArray(),bias,tension,continuity);				
 		}
 		break;
 		case SplineType.BezierSpline:
@@ -103,6 +107,14 @@ public class SplineComponent : MonoBehaviour {
 			}
 			break;
 		}	
+		
+		// hack to make the editor update the obejct
+		Vector3 p = transform.position;
+		transform.position = Vector3.zero;
+		if (p.magnitude>0){
+			transform.position = p;
+		}
+		
 		updated = true;
 	}
 	
@@ -142,7 +154,8 @@ public class SplineComponent : MonoBehaviour {
 	public int GetControlPointsPerSegment(){
 		switch (splineType){
 			case SplineType.LinearSpline:
-			case SplineType.HermiteSpline:
+			case SplineType.CatmullRom:
+			case SplineType.KochanekBartel:
 			return 2;
 		case SplineType.BezierSpline:
 			return 4;
@@ -151,6 +164,7 @@ public class SplineComponent : MonoBehaviour {
 			return 3;	
 		}
 	}
+	
 	
 	public void OnDrawGizmos(){
 		if (alwaysDrawGizmo){

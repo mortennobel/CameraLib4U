@@ -3,34 +3,15 @@ using System.Collections;
 using System;
 
 public class HermiteSplineCurve : SplineCurve {
-	private Vector3[] mInTangentVectors;
-	private Vector3[] mOutTangentVectors;
+	private Vector3[] tangent0Vectors; // first tangent at a line segment
+	private Vector3[] tangent1Vectors; // last tangent at a line segment
 	
-	public Vector3[] inTangentVectors{
-		get{
-			return mInTangentVectors;
-		}
-		protected set{
-			mInTangentVectors = value;
-		}
-	}
-	
-	public Vector3[] outTangentVectors{
-		get{
-			return mOutTangentVectors;
-		}
-		protected set{
-			mOutTangentVectors =value;
-		}
-	}
-	
-	
-	public void Init(Vector3[] controlPoints, Vector3[] inTangentVectors, Vector3[] outTangentVectors, float[] time){
+	public void Init(Vector3[] controlPoints, Vector3[] tangent0Vectors, Vector3[] tangent1Vectors, float[] time){
 		if (Debug.isDebugBuild) {
-			if (controlPoints.Length-1!=inTangentVectors.Length){
+			if (controlPoints.Length-1!=tangent1Vectors.Length){
 				throw new Exception("Invalid length of inTangentVectors. Must be one less than control points.");
 			}
-			if (controlPoints.Length-1!=outTangentVectors.Length){
+			if (controlPoints.Length-1!=tangent0Vectors.Length){
 				throw new Exception("Invalid length of outTangentVectors. Must be one less than control points.");
 			}
 			if (time.Length!=controlPoints.Length){
@@ -38,12 +19,12 @@ public class HermiteSplineCurve : SplineCurve {
 			}
 		}
 		this.controlPoints = new Vector3[controlPoints.Length];
-		this.inTangentVectors = new Vector3[inTangentVectors.Length];
-		this.outTangentVectors = new Vector3[outTangentVectors.Length];
+		this.tangent1Vectors = new Vector3[tangent1Vectors.Length];
+		this.tangent0Vectors = new Vector3[tangent0Vectors.Length];
 		this.time = new float[time.Length];
 		Array.Copy(controlPoints, this.controlPoints, controlPoints.Length);
-		Array.Copy(inTangentVectors, this.inTangentVectors, inTangentVectors.Length);
-		Array.Copy(outTangentVectors, this.outTangentVectors, outTangentVectors.Length);
+		Array.Copy(tangent1Vectors, this.tangent1Vectors, tangent1Vectors.Length);
+		Array.Copy(tangent0Vectors, this.tangent0Vectors, tangent0Vectors.Length);
 		Array.Copy(time, this.time, time.Length);
 		calculateSegmentLength();
 	}
@@ -63,12 +44,12 @@ public class HermiteSplineCurve : SplineCurve {
 	}
 	
 	public void InitKochanekBartel(Vector3[] controlPoints, float[] time, float bias, float tension, float continuity){
-		Vector3[] inTangents = new Vector3[controlPoints.Length-1];
-		Vector3[] outTangents = new Vector3[controlPoints.Length-1];
+		Vector3[] tangent1Vectors = new Vector3[controlPoints.Length-1];
+		Vector3[] tangent0Vectors = new Vector3[controlPoints.Length-1];
 		for (int i=0;i<controlPoints.Length;i++){
-			Vector3 pm1 = i>0?controlPoints[i-1]:Vector3.zero; // point minus one
+			Vector3 pm1 = i>0?controlPoints[i-1]:controlPoints[i]+(controlPoints[i]-controlPoints[i+1]); // point minus one
 			Vector3 p = controlPoints[i];
-			Vector3 pp1 = i<controlPoints.Length-1?controlPoints[i+1]:Vector3.zero; // point plus one
+			Vector3 pp1 = i<controlPoints.Length-1?controlPoints[i+1]:controlPoints[i]+(controlPoints[i]-controlPoints[i-1]); // point plus one
 			
 			Vector3 si = ((1-bias)*(1+tension)*(1-continuity)/2)*(p-pm1)+((1-bias)*(1-tension)*(1+continuity)/2)*(pp1-p);		
 			Vector3 di = ((1-bias)*(1+tension)*(1+continuity)/2)*(p-pm1)+((1-bias)*(1-tension)*(1-continuity)/2)*(pp1-p);		
@@ -78,18 +59,18 @@ public class HermiteSplineCurve : SplineCurve {
 			
 			if (i>0){
 				//  adjust tangent length
-				si = (2*Nim1/(Nim1+Ni))*si;
+				si = (2*Ni/(Nim1+Ni))*si;
 			
-				outTangents[i-1] = si;
+				tangent1Vectors[i-1] = si;
 			}
 			if (i<controlPoints.Length-1){
 				//  adjust tangent length
-				di = (2*Ni/(Nim1+Ni))*di;
+				di = (2*Nim1/(Nim1+Ni))*di;
 			
-				inTangents[i] = di;
+				tangent0Vectors[i] = di;
 			}
 		}
-		Init(controlPoints, inTangents, outTangents, time);
+		Init(controlPoints, tangent0Vectors, tangent1Vectors, time);
 	}
 	
 	public void InitNatural(Vector3[] controlPoints){
@@ -122,8 +103,8 @@ public class HermiteSplineCurve : SplineCurve {
 
 		// set up arrays
 		this.controlPoints = new Vector3[n];
-		this.inTangentVectors = new Vector3[n-1];
-		this.outTangentVectors = new Vector3[n-1];
+		this.tangent0Vectors = new Vector3[n-1];
+		this.tangent1Vectors = new Vector3[n-1];
 		this.time = new float[n];
 		
 		// set up the tangents
@@ -136,26 +117,26 @@ public class HermiteSplineCurve : SplineCurve {
 	    	// compute count-1 incoming tangents
 	    	if ( i < n-1 )
 	    	{
-	        	this.inTangentVectors[i] = 3.0f*A[i,0]*(controlPoints[1]-controlPoints[0])
+	        	this.tangent0Vectors[i] = 3.0f*A[i,0]*(controlPoints[1]-controlPoints[0])
 	                         + 3.0f*A[i ,n-n]*(controlPoints[n-1]-controlPoints[n-2]);
 	        	for ( int j = 1; j < n-1; ++j )
 	        	{
 	            	Vector3 b_j = 3.0f*(controlPoints[j+1]-controlPoints[j-1]);
-	            	this.inTangentVectors[i] += A[i , j]*b_j;
+	            	this.tangent0Vectors[i] += A[i , j]*b_j;
 	       		}
 	        	// out tangent is in tangent of next segment
 	        	if (i > 0)
-	            	this.outTangentVectors[i-1] = this.inTangentVectors[i];
+	            	this.tangent1Vectors[i-1] = this.tangent0Vectors[i];
 	    	}
 	    	// compute final outgoing tangent
 	    	else
 	    	{
-	        	this.outTangentVectors[i-1] = 3.0f*A[i,0]*(controlPoints[1]-controlPoints[0])
+	        	this.tangent1Vectors[i-1] = 3.0f*A[i,0]*(controlPoints[1]-controlPoints[0])
 	                         + 3.0f*A[i,n-n]*(controlPoints[n-1]-controlPoints[n-2]);
 	        	for ( int j = 1; j < n-1; ++j )
 	        	{
 	            	Vector3 b_j = 3.0f*(controlPoints[j+1]-controlPoints[j-1]);
-	            	this.outTangentVectors[i-1] += A[i,j]*b_j;
+	            	this.tangent1Vectors[i-1] += A[i,j]*b_j;
 	        	}
 	    	}
 		}
@@ -175,14 +156,14 @@ public class HermiteSplineCurve : SplineCurve {
 		// simplified matrix multiplication
 		Vector3 A = 2.0f*controlPoints[i]
                 - 2.0f*controlPoints[i+1]
-                + inTangentVectors[i]
-                + outTangentVectors[i];
+                + tangent0Vectors[i]
+                + tangent1Vectors[i];
     	Vector3 B = -3.0f*controlPoints[i]
                 + 3.0f*controlPoints[i+1]
-                - 2.0f*inTangentVectors[i]
-                - outTangentVectors[i];
+                - 2.0f*tangent0Vectors[i]
+                - tangent1Vectors[i];
     
-    	return controlPoints[i] + u*(inTangentVectors[i] + u*(B + u*A));
+    	return controlPoints[i] + u*(tangent0Vectors[i] + u*(B + u*A));
 	}
 	
 	public override Vector3 GetVelocity(float time){
@@ -198,13 +179,13 @@ public class HermiteSplineCurve : SplineCurve {
 		// simplified matrix multiplication
 		Vector3 A = 2.0f*controlPoints[i]
                 - 2.0f*controlPoints[i+1]
-                + inTangentVectors[i]
-                + outTangentVectors[i];
+                + tangent0Vectors[i]
+                + tangent1Vectors[i];
     	Vector3 B = -3.0f*controlPoints[i]
                 + 3.0f*controlPoints[i+1]
-                - 2.0f*inTangentVectors[i]
-                - outTangentVectors[i];
+                - 2.0f*tangent0Vectors[i]
+                - tangent1Vectors[i];
 		
-    	return inTangentVectors[i] + u*(2.0f*B + 3.0f*u*A);
+    	return tangent0Vectors[i] + u*(2.0f*B + 3.0f*u*A);
 	}
 }
