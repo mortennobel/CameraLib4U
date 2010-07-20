@@ -48,6 +48,50 @@ public class HermiteSplineCurve : SplineCurve {
 		calculateSegmentLength();
 	}
 	
+	/// <summary>
+	/// Use linear distance between controlpoints as time estimate
+	/// </summary>
+	public void InitKochanekBartel(Vector3[] controlPoints, float bias, float tension, float continuity){
+		float[] time = new float[controlPoints.Length];
+		float totalTime = 0;
+		time[0] = 0;
+		for (int i=1;i<controlPoints.Length;i++){
+			totalTime += (controlPoints[i]-controlPoints[i-1]).magnitude;
+			time[i] = totalTime;
+		}
+		InitKochanekBartel(controlPoints,time,bias,tension,continuity);
+	}
+	
+	public void InitKochanekBartel(Vector3[] controlPoints, float[] time, float bias, float tension, float continuity){
+		Vector3[] inTangents = new Vector3[controlPoints.Length-1];
+		Vector3[] outTangents = new Vector3[controlPoints.Length-1];
+		for (int i=0;i<controlPoints.Length;i++){
+			Vector3 pm1 = i>0?controlPoints[i-1]:Vector3.zero; // point minus one
+			Vector3 p = controlPoints[i];
+			Vector3 pp1 = i<controlPoints.Length-1?controlPoints[i+1]:Vector3.zero; // point plus one
+			
+			Vector3 si = ((1-bias)*(1+tension)*(1-continuity)/2)*(p-pm1)+((1-bias)*(1-tension)*(1+continuity)/2)*(pp1-p);		
+			Vector3 di = ((1-bias)*(1+tension)*(1+continuity)/2)*(p-pm1)+((1-bias)*(1-tension)*(1-continuity)/2)*(pp1-p);		
+			
+			float Ni = time[Math.Min(i+1,controlPoints.Length-1)]-time[i];
+			float Nim1 = time[i]-time[Math.Max(0,i-1)];
+			
+			if (i>0){
+				//  adjust tangent length
+				si = (2*Nim1/(Nim1+Ni))*si;
+			
+				outTangents[i-1] = si;
+			}
+			if (i<controlPoints.Length-1){
+				//  adjust tangent length
+				di = (2*Ni/(Nim1+Ni))*di;
+			
+				inTangents[i] = di;
+			}
+		}
+		Init(controlPoints, inTangents, outTangents, time);
+	}
+	
 	public void InitNatural(Vector3[] controlPoints){
 		if (Debug.isDebugBuild) {
 			if (controlPoints.Length<3){

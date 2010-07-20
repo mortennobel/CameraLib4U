@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class SplineComponent : MonoBehaviour {
 	
-	public enum SplineType { LinearSpline,BezierSpline,BezierSmoothSpline, HermiteSpline };
+	public enum SplineType { LinearSpline,BezierSpline,BezierSmoothSpline, HermiteSpline, KochanekBartel };
 	
 	public SplineType splineType = SplineType.LinearSpline;
 	public SplineCurve spline;
@@ -80,6 +80,14 @@ public class SplineComponent : MonoBehaviour {
 			hSpline.InitNatural(controlPoints.ToArray());
 			}
 			break;
+		case SplineType.KochanekBartel:
+		{
+			HermiteSplineCurve hSpline = new HermiteSplineCurve();
+			spline = hSpline;
+			spline.lengthPrecision =lengthPrecision;
+			hSpline.InitKochanekBartel(controlPoints.ToArray(),0f,0f,0f);	
+		}
+		break;
 		case SplineType.BezierSpline:
 		case SplineType.BezierSmoothSpline:
 			BezierSplineCurve bSpline = new BezierSplineCurve();

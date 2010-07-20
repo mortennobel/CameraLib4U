@@ -27,7 +27,11 @@ public static class Damping {
 	}
 	
 	/// <summary>
+	/// Return the spring damping ratio
 	/// 
+	/// If less than 1, then under-damped = oscillate before returning to rest
+	/// If more than 1, then over-damped = take longer to rest 
+	/// If 1 then critically damped - return to rest in minimum time (given the springStiffness)
 	/// </summary>
 	public static float GetSpringDampingRatio(float springStiffness, float springDamping){
 		return springDamping/(2*Mathf.Sqrt(springStiffness));
