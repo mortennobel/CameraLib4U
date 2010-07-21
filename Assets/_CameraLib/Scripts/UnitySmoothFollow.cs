@@ -28,10 +28,9 @@ public class UnitySmoothFollow : ICamera {
 	public float  heightDamping = 2.0f;
 	public float rotationDamping = 3.0f;
 	
-	
 	// Use this for initialization
 	void Start () {
-	
+		this.smoothLookAtEnabled = false; // disable smooth rotation
 	}
 	
 	// Update is called once per frame
@@ -40,33 +39,36 @@ public class UnitySmoothFollow : ICamera {
 		if (target == null){
 			return;
 		}
-		target.position = GetCameraTargetPosition();
+		
+		GetCameraTargetPosition();
 	}
 	
 	public override Vector3 GetCameraTargetPosition(){
-		Vector3 position = target.position;
 		// Calculate the current rotation angles
 		float wantedRotationAngle = target.eulerAngles.y;
 		float wantedHeight = target.position.y + height;
-			
+		
 		float currentRotationAngle = transform.eulerAngles.y;
 		float currentHeight = transform.position.y;
-		
+	
 		// Damp the rotation around the y-axis
 		currentRotationAngle = Mathf.LerpAngle (currentRotationAngle, wantedRotationAngle, rotationDamping * Time.deltaTime);
-	
+
 		// Damp the height
 		currentHeight = Mathf.Lerp (currentHeight, wantedHeight, heightDamping * Time.deltaTime);
-	
+
 		// Convert the angle into a rotation
 		Quaternion currentRotation = Quaternion.Euler (0, currentRotationAngle, 0);
-		
+	
 		// Set the position of the camera on the x-z plane to:
 		// distance meters behind the target
-		position -= currentRotation * (Vector3.forward * distance);
-	
+		transform.position = target.position;
+		transform.position -= currentRotation * Vector3.forward * distance;
+
 		// Set the height of the camera
-		position.y = currentHeight;
-		return position;
+		Vector3 tmp = transform.position;
+		tmp.y = currentHeight;
+		transform.position = tmp;
+		return transform.position;
 	}
 }

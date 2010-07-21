@@ -2,8 +2,8 @@ using UnityEngine;
 using System.Collections;
 
 public class ICamera :MonoBehaviour{
-	public float lookatDamping = 6.0f;
-	public bool smooth = true;
+	public float smoothLookAtDamping = 6.0f;
+	public bool smoothLookAtEnabled = true;
 	
 	public Transform target;
 	
@@ -32,11 +32,12 @@ public class ICamera :MonoBehaviour{
 	/// </summary>
 	void LateUpdate () {
 		UpdateCameraPosition();
-		if (smooth)
+		
+		if (smoothLookAtEnabled)
 		{
 			// Look at and dampen the rotation
 			Quaternion rotation = Quaternion.LookRotation(target.position - transform.position);
-			transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * lookatDamping);
+			transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * smoothLookAtDamping);
 		}
 		else
 		{
