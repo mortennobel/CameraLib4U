@@ -14,7 +14,7 @@ using System.Collections;
 [RequireComponent (typeof (Camera))]
 public class PathBoundCamera : ICamera {
 	public SplineComponent cameraSpline;
-	// public SplineComponent targetSpline;
+	
 	private SplineCurve cameraSplineObject;
 	
 	/// <summary>
@@ -43,9 +43,8 @@ public class PathBoundCamera : ICamera {
     /// Physics coefficient which approximates internal friction of the spring.
     /// Sufficient damping will prevent the spring from oscillating infinitely.
     public float springDamping = 12.0f;
-
-	// private Vector3 desiredPosition;
-	// private Vector3 velocity = Vector3.zero;
+	
+	private float desiredPosition;
 	private float velocity = 0f;
 	
 	// Use this for initialization
@@ -59,13 +58,6 @@ public class PathBoundCamera : ICamera {
 	/// </summary> 
 	public override void UpdateCameraPosition () {
 		distanceBasedJumpcutTimer += Time.deltaTime;
-		
-		/*desiredPosition = GetCameraTargetPosition();
-		if (springSmoothingEnabled){
-			transform.position = Damping.SpringDamping(transform.position,desiredPosition, ref velocity, springStiffness, springDamping);
-		} else {
-			transform.position = desiredPosition;
-		}*/
 		transform.position = GetCameraTargetPosition();
 	}
 	
@@ -92,8 +84,8 @@ public class PathBoundCamera : ICamera {
 			}
 		}
 		transform.position = controlpoints[closestControlPoint];
-		//desiredPosition = transform.position;
 		currentPositionOnPath =cameraSplineObject.time[closestControlPoint];
+		desiredPosition = currentPositionOnPath;
 		velocity = 0f;
 		distanceBasedJumpcutTimer = 0;
 	}
@@ -108,8 +100,8 @@ public class PathBoundCamera : ICamera {
 		
 		if (distance.sqrMagnitude <= maxDistanceToTarget*maxDistanceToTarget){
 			// don't move camera, since target is closer than preferredDistanceToCamera
-			currentPositionOnPath = Damping.SpringDamping(currentPositionOnPath, currentPositionOnPath, ref velocity,springStiffness, springDamping);
-			currentPositionOnPath = Mathf.Clamp(desiredPositionOnSpline,0,cameraSplineObject.totalTime);
+			desiredPosition = currentPositionOnPath = Damping.SpringDamping(currentPositionOnPath, currentPositionOnPath, ref velocity,springStiffness, springDamping);
+			currentPositionOnPath = Mathf.Clamp(desiredPosition,0,cameraSplineObject.totalTime);
 			return cameraSplineObject.GetPosition(currentPositionOnPath);
 		} 	
 		
@@ -130,22 +122,22 @@ public class PathBoundCamera : ICamera {
 			estimatedDelta =-estimatedDelta;
 		}
 		
-		float desiredPositionOnSpline = currentPositionOnPath+estimatedDelta;
+		desiredPosition = currentPositionOnPath+estimatedDelta;
 		float velocityCopy = velocity;
-		desiredPositionOnSpline = Damping.SpringDamping(currentPositionOnPath, desiredPositionOnSpline, ref velocityCopy,springStiffness, springDamping);
+		desiredPosition = Damping.SpringDamping(currentPositionOnPath, desiredPosition, ref velocityCopy,springStiffness, springDamping);
 		
 		// make sure if the desired position will not pull the camera backwards
-		Vector3 newSplineVelocity = cameraSplineObject.GetVelocity(desiredPositionOnSpline);
-		Vector3 newDistance = cameraSplineObject.GetPosition(desiredPositionOnSpline)-target.position;
+		Vector3 newSplineVelocity = cameraSplineObject.GetVelocity(desiredPosition);
+		Vector3 newDistance = cameraSplineObject.GetPosition(desiredPosition)-target.position;
 		float newDotProduct = Vector3.Dot(newSplineVelocity, newDistance);
 		if (newDotProduct>0==dotProduct>0){
 			// only update velocity if movement
 			velocity = velocityCopy; 
 		} else {
 			// note that this update velocity directly
-			desiredPositionOnSpline = Damping.SpringDamping(currentPositionOnPath, currentPositionOnPath, ref velocity,springStiffness, springDamping);
+			desiredPosition = Damping.SpringDamping(currentPositionOnPath, currentPositionOnPath, ref velocity,springStiffness, springDamping);
 		}
-		currentPositionOnPath = Mathf.Clamp(desiredPositionOnSpline,0,cameraSplineObject.totalTime);
+		currentPositionOnPath = Mathf.Clamp(desiredPosition,0,cameraSplineObject.totalTime);
 			
 		return cameraSplineObject.GetPosition(currentPositionOnPath);
 	}
@@ -160,6 +152,6 @@ public class PathBoundCamera : ICamera {
 	
 	public void OnDrawGizmosSelected(){
 		Gizmos.color = Color.white;
-    	// Gizmos.DrawWireSphere (desiredPosition, 0.2f);
+    	Gizmos.DrawWireSphere (cameraSplineObject.GetPosition(desiredPosition), 0.2f);
 	}
 }
