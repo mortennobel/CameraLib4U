@@ -7,11 +7,12 @@ public class ChaseCamera : ICamera {
 	public float cameraHeight = 2;
 	public float distance = 3;
 	
+	public enum ChaseCameraType { Loose, LooseAllowMovementUnderCamra,StayBehind };
+	
+	public ChaseCameraType cameraType = ChaseCameraType.StayBehind;
+	
 	private Vector3 lastCameraTargetPosition = Vector3.zero;
 	public Vector3 idealSpherical = new Vector3();
-	
-	public bool stayBehindTarget = true;
-	public bool allowMovementUnderCamera = false;
 	
 	// movement spring
 	public bool springSmoothingEnabled = true; 
@@ -25,6 +26,16 @@ public class ChaseCamera : ICamera {
     public float springDamping = 12.0f;
 	private Vector3 velocity = Vector3.zero;
 	
+	/// <summary>
+	/// The controller look horizontal. Value is between -1 and 1
+	/// </summary>
+	public float  lookHorizontal = 0; 
+	private float lookHorizontalActual = 0;
+	private float lookHorizontalVelocity = 0;
+	public bool lookHorizontalSpringDamped = true;
+	public float lookHorizontalSpringStiffness = 36;
+	public float lookHorizontalSpringDamping = 12;
+	
 	// Use this for initialization
 	void Start () {
 		lastCameraTargetPosition = transform.position;
@@ -35,7 +46,13 @@ public class ChaseCamera : ICamera {
 	private void UpdateIdealSpherical(){
 		idealSpherical.x = distance;
 		idealSpherical.z = Mathf.Asin(cameraHeight/distance);
-		
+	}
+	
+	/// <summary>
+	/// Returns the Pitch of the camera in degrees (rotation around the x axis) 
+	/// </summary>
+	public float GetCameraPitch(){
+		return -Mathf.Asin(cameraHeight/distance)*Mathf.Rad2Deg;
 	}
 	
 	public override void InitCamera(){
@@ -59,13 +76,27 @@ public class ChaseCamera : ICamera {
 	 */
 	public override Vector3 GetCameraTargetPosition(){
 		if (target==null){
-			return transform.position;
+			return lastCameraTargetPosition;
 		}
 		
-		if (stayBehindTarget){
+		if (cameraType==ChaseCameraType.StayBehind){
 			Vector3 rotation = target.transform.rotation.eulerAngles;
 			idealSpherical.y = -rotation.y*Mathf.Deg2Rad-(Mathf.PI*0.5f);
+			if (lookHorizontalSpringDamped){
+				lookHorizontalActual = Damping.SpringDamping(lookHorizontalActual,lookHorizontal, ref lookHorizontalVelocity,
+					lookHorizontalSpringStiffness,lookHorizontalSpringDamping);
+				idealSpherical.y += lookHorizontalActual*(2*Mathf.PI);
+				 
+				// normalize
+				// ???
+			}
 		} else {
+			if (cameraType==ChaseCameraType.LooseAllowMovementUnderCamra){
+				Vector3 displacement = transform.position-target.position;
+				if (displacement.sqrMagnitude < distance*distance){
+					return lastCameraTargetPosition;
+				}
+			}
 			idealSpherical.y = Mathf.Atan2(transform.position.z-target.position.z,
 				transform.position.x-target.position.x);
 		}
@@ -73,9 +104,6 @@ public class ChaseCamera : ICamera {
 		
 		return lastCameraTargetPosition;
 	}
-	
-	
-
 	
 	// the performance of this method is a bit on the heavy side, but is only used in the editor
 	public void OnDrawGizmosSelected () {
