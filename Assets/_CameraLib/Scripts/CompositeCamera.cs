@@ -101,16 +101,16 @@ public class CompositeCamera : AbstractCamera {
 		}
 	}
 	
-	public override void UpdateLookRotation(){
+	public override void UpdateLookOrientation(){
 		if (lastCamera != -1){
-			cameras[lastCamera].UpdateLookRotation();
-			cameras[currentCamera].UpdateLookRotation();
+			cameras[lastCamera].UpdateLookOrientation();
+			cameras[currentCamera].UpdateLookOrientation();
 			
 			Quaternion from = cameras[lastCamera].transform.rotation;
 			Quaternion to = cameras[currentCamera].transform.rotation;
 			transform.rotation = Quaternion.Slerp(from,to,lastInterpol); 
 		} else{
-			cameras[currentCamera].UpdateLookRotation();
+			cameras[currentCamera].UpdateLookOrientation();
 			transform.rotation = cameras[currentCamera].transform.rotation;
 		}
 	}

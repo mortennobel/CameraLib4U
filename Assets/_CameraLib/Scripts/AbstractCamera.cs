@@ -51,18 +51,15 @@ public abstract class AbstractCamera : MonoBehaviour{
 	/// </summary>
 	void LateUpdate () {
 		UpdateCameraPosition();
-		UpdateLookRotation();
+		UpdateLookOrientation();
 	}
 	
-	public virtual void UpdateLookRotation(){
-		if (smoothLookAtEnabled)
-		{
+	public virtual void UpdateLookOrientation(){
+		if (smoothLookAtEnabled) {
 			// Look at and dampen the rotation
 			Quaternion rotation = Quaternion.LookRotation(target.position - transform.position);
 			transform.rotation =  Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * smoothLookAtDamping);
-		}
-		else
-		{
+		} else {
 			// Just lookat
 		    transform.rotation =  Quaternion.LookRotation(target.position - transform.position);
 		}
