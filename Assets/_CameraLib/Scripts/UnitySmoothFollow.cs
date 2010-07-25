@@ -40,10 +40,10 @@ public class UnitySmoothFollow : AbstractCamera {
 			return;
 		}
 		
-		GetCameraTargetPosition();
+		GetCameraDesiredPosition();
 	}
 	
-	public override Vector3 GetCameraTargetPosition(){
+	public override Vector3 GetCameraDesiredPosition(){
 		// Calculate the current rotation angles
 		float wantedRotationAngle = target.eulerAngles.y;
 		float wantedHeight = target.position.y + height;

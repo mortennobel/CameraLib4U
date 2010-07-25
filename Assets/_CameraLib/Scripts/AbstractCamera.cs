@@ -1,20 +1,36 @@
 using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// This abstract camera type mainly defines the default camera properties and behavior. The camera is associated with 
+/// one target object, that can be changed runtime using the SetTarget method.
+/// 
+/// The default behavior is first update position (UpdateCameraPosition() method) and then update rotation 
+/// (UpdateLookRotation() method).
+/// </summary>
 public abstract class AbstractCamera : MonoBehaviour{
 	public float smoothLookAtDamping = 6.0f;
 	public bool smoothLookAtEnabled = true;
 	
 	public Transform target;
 	
+	/// <summary>
+	/// Updates the camera position - by calling the GetCameraDesiredPosition() and smooth the movement.
+	/// </summary>
 	public virtual void UpdateCameraPosition(){
 		// empty
 	}
 	
-	public virtual Vector3 GetCameraTargetPosition(){
+	/// <summary>
+	/// Gets the camera desired position. (the undamped camera position)
+	/// </summary>
+	public virtual Vector3 GetCameraDesiredPosition(){
 		return Vector3.zero;
 	}
 	
+	/// <summary>
+	/// Sets the target runtime.
+	/// </summary>
 	public virtual void SetTarget(Transform transform){
 		this.target = transform;	
 	}
@@ -23,6 +39,9 @@ public abstract class AbstractCamera : MonoBehaviour{
 		return target;
 	}
 	
+	/// <summary>
+	/// Is called before a camera becomes active
+	/// </summary>
 	public virtual void InitCamera(){
 		// empty
 	}

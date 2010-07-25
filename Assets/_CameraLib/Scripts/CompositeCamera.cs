@@ -19,7 +19,7 @@ public class CompositeCamera : AbstractCamera {
 	// An ease in, ease out animation curve (tangents are all flat)
 	public AnimationCurve curve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 1));
 	
-	public override Vector3 GetCameraTargetPosition(){
+	public override Vector3 GetCameraDesiredPosition(){
 		// not used here
 		return Vector3.zero;
 	}

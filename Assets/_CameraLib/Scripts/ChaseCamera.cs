@@ -63,7 +63,7 @@ public class ChaseCamera : AbstractCamera {
 	/// Update is called once per frame
 	/// </summary> 
 	public override void UpdateCameraPosition () {
-		Vector3 position = GetCameraTargetPosition();
+		Vector3 position = GetCameraDesiredPosition();
 		if (springSmoothingEnabled){
 			transform.position = Damping.SpringDamping(transform.position,position,ref velocity,springStiffness,springDamping);
 		} else {
@@ -74,7 +74,7 @@ public class ChaseCamera : AbstractCamera {
 	/**
 	 * This is the optimal camera position that the camera moves towards
 	 */
-	public override Vector3 GetCameraTargetPosition(){
+	public override Vector3 GetCameraDesiredPosition(){
 		if (target==null){
 			return lastCameraTargetPosition;
 		}
@@ -108,7 +108,7 @@ public class ChaseCamera : AbstractCamera {
 	// the performance of this method is a bit on the heavy side, but is only used in the editor
 	public void OnDrawGizmosSelected () {
 		if (target!=null){
-			Gizmos.DrawIcon(GetCameraTargetPosition(), "camera.png");
+			Gizmos.DrawIcon(GetCameraDesiredPosition(), "camera.png");
 			
 			// draw circle to illustrate distance to target
 			Gizmos.color = Color.yellow;
