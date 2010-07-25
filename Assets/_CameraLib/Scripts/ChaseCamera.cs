@@ -43,12 +43,24 @@ public class ChaseCamera : AbstractCamera {
 	private float lookVerticalActual = 0;
 	private float lookVerticalVelocity = 0;
 	
+	// virtual camera collisions test (See "Third-Person Camera Navigasion" Jonathan Stone, Game Programming Gems 4)
+	public bool virtualCameraCollisionTest = true;
+	public float virtualCameraCollisionRadius = 0.5f;
+	public float targetHeight = 0.5f;
+	
+	public bool[] raycastResult = new bool[3];
+	private Vector3[] raycastOffset = new Vector3[3];
+	private int raycastCounter = 0;
 	
 	
 	// Use this for initialization
 	void Start () {
 		lastCameraTargetPosition = transform.position;
 		UpdateIdealSpherical();
+		raycastOffset[0] = Vector3.up*(targetHeight*0.5f);
+		raycastOffset[1] = Vector3.up*(targetHeight*0.5f);
+		raycastOffset[2] = Vector3.zero;
+		
 	} 
 	
 	private void UpdateIdealSpherical(){
@@ -113,8 +125,27 @@ public class ChaseCamera : AbstractCamera {
 			idealSpherical.y = Mathf.Atan2(transform.position.z-target.position.z,
 				transform.position.x-target.position.x);
 		}
-		lastCameraTargetPosition = target.position+Vector3Ext.SphericalToCartesian(idealSpherical);
-		
+		Vector3 direction = Vector3Ext.SphericalToCartesian(idealSpherical);;
+		lastCameraTargetPosition = target.position+direction;
+		if (virtualCameraCollisionTest){
+			raycastCounter++;
+			if (raycastCounter>2){
+				raycastCounter = 0;
+			}
+			raycastResult[raycastCounter] = Physics.Raycast(target.position+raycastOffset[raycastCounter],direction,distance);
+			// todo - add layermast
+			RaycastHit hit = new RaycastHit();
+			bool isHit = Physics.SphereCast(target.position,virtualCameraCollisionRadius,direction,out hit, distance);  
+			if (isHit){
+				if (hit.distance<distance*0.25f && (!raycastResult[0] || !raycastResult[1]|| !raycastResult[2])){
+					idealSpherical.x = distance;
+				} else {
+					idealSpherical.x = hit.distance;
+				}
+			} else {
+				idealSpherical.x = distance;
+			}
+		}
 		return lastCameraTargetPosition;
 	}
 	
@@ -125,7 +156,11 @@ public class ChaseCamera : AbstractCamera {
 			
 			// draw circle to illustrate distance to target
 			Gizmos.color = Color.yellow;
-			Gizmos.DrawWireSphere (transform.position, distance);	
+			Gizmos.DrawWireSphere (transform.position, distance);
+			if (virtualCameraCollisionTest){
+				Gizmos.color = Color.green;
+				Gizmos.DrawWireSphere (transform.position, virtualCameraCollisionRadius);
+			}
 		}	
 	}
 }
