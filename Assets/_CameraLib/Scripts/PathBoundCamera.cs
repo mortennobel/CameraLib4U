@@ -66,6 +66,7 @@ public class PathBoundCamera : ICamera {
 	/// </summary>
 	public override void InitCamera(){
 		JumpCutToClosestControlPoint();
+		base.InitCamera();
 	}
 	
 	/// <summary>

@@ -24,7 +24,9 @@ public class ICamera :MonoBehaviour{
 	}
 	
 	public virtual void InitCamera(){
-		
+		if (!smoothLookAtEnabled){
+			smoothLookAtDamping = 100000f;
+		}
 	}
 	
 	/// <summary>
@@ -32,17 +34,20 @@ public class ICamera :MonoBehaviour{
 	/// </summary>
 	void LateUpdate () {
 		UpdateCameraPosition();
-		
+		UpdateLookRotation();
+	}
+	
+	public virtual void UpdateLookRotation(){
 		if (smoothLookAtEnabled)
 		{
 			// Look at and dampen the rotation
 			Quaternion rotation = Quaternion.LookRotation(target.position - transform.position);
-			transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * smoothLookAtDamping);
+			transform.rotation =  Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * smoothLookAtDamping);
 		}
 		else
 		{
 			// Just lookat
-		    transform.LookAt(target);
+		    transform.rotation =  Quaternion.LookRotation(target.position - transform.position);
 		}
 	}
 }

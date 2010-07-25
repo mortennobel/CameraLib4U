@@ -56,7 +56,7 @@ public class ChaseCamera : ICamera {
 	}
 	
 	public override void InitCamera(){
-		// unused
+		base.InitCamera();
 	}
 	
 	/// <summary>
