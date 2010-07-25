@@ -6,9 +6,9 @@ using System.Collections;
 /// </summary>
 [AddComponentMenu("CameraLib/Composite Camera")]
 [RequireComponent (typeof (Camera))]
-public class CompositeCamera : ICamera {
+public class CompositeCamera : AbstractCamera {
 
-	public ICamera[] cameras;
+	public AbstractCamera[] cameras;
 	public int currentCamera = 0;
 	public int lastCamera = -1;
 	private float interpolationTime = 0;
@@ -111,7 +111,6 @@ public class CompositeCamera : ICamera {
 			transform.rotation = Quaternion.Slerp(from,to,lastInterpol); 
 		} else{
 			cameras[currentCamera].UpdateLookRotation();
-			
 			transform.rotation = cameras[currentCamera].transform.rotation;
 		}
 	}

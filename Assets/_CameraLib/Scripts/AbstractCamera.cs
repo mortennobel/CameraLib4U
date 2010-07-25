@@ -1,14 +1,14 @@
 using UnityEngine;
 using System.Collections;
 
-public class ICamera :MonoBehaviour{
+public abstract class AbstractCamera : MonoBehaviour{
 	public float smoothLookAtDamping = 6.0f;
 	public bool smoothLookAtEnabled = true;
 	
 	public Transform target;
 	
 	public virtual void UpdateCameraPosition(){
-		Debug.Log("Foo");
+		// empty
 	}
 	
 	public virtual Vector3 GetCameraTargetPosition(){
@@ -24,9 +24,7 @@ public class ICamera :MonoBehaviour{
 	}
 	
 	public virtual void InitCamera(){
-		if (!smoothLookAtEnabled){
-			smoothLookAtDamping = 100000f;
-		}
+		// empty
 	}
 	
 	/// <summary>

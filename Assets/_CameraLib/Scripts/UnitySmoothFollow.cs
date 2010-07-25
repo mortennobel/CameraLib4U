@@ -16,7 +16,7 @@ using System.Collections;
 /// </summary>
 [AddComponentMenu("CameraLib/Smooth follow")]
 [RequireComponent (typeof (Camera))]
-public class UnitySmoothFollow : ICamera {
+public class UnitySmoothFollow : AbstractCamera {
 	/// <summary>
 	/// The distance in the x-z plane to the target
 	/// </summary> 

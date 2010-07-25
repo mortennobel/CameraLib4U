@@ -12,7 +12,7 @@ using System.Collections;
 /// </summary>
 [AddComponentMenu("CameraLib/Path Bound Camera")]
 [RequireComponent (typeof (Camera))]
-public class PathBoundCamera : ICamera {
+public class PathBoundCamera : AbstractCamera {
 	public SplineComponent cameraSpline;
 	
 	private SplineCurve cameraSplineObject;
@@ -30,7 +30,6 @@ public class PathBoundCamera : ICamera {
 	 
 	public float minTimeBetweenDistancebasedJumpcut =3;
 	private float distanceBasedJumpcutTimer = 0;
-	
 	
 	public bool springSmoothingEnabled = true; 
 	
@@ -73,7 +72,7 @@ public class PathBoundCamera : ICamera {
 	/// Search for the control point closest to the player and jump cut to that position 
 	/// </summary>
 	private void JumpCutToClosestControlPoint(){
-		Vector3[] controlpoints =cameraSplineObject.controlPoints;
+		Vector3[] controlpoints = cameraSplineObject.controlPoints;
 		float minDistance = float.MaxValue;
 		
 		int closestControlPoint= 0;
@@ -85,7 +84,7 @@ public class PathBoundCamera : ICamera {
 			}
 		}
 		transform.position = controlpoints[closestControlPoint];
-		currentPositionOnPath =cameraSplineObject.time[closestControlPoint];
+		currentPositionOnPath = cameraSplineObject.time[closestControlPoint];
 		desiredPosition = currentPositionOnPath;
 		velocity = 0f;
 		distanceBasedJumpcutTimer = 0;
