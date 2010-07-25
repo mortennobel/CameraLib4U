@@ -13,6 +13,9 @@ public class ChaseCamera : AbstractCamera {
 	
 	private Vector3 lastCameraTargetPosition = Vector3.zero;
 	public Vector3 idealSpherical = new Vector3();
+	private float initialPitch;
+	
+	private Vector3 desiredPosition = Vector3.zero;
 	
 	// movement spring
 	public bool springSmoothingEnabled = true; 
@@ -26,26 +29,32 @@ public class ChaseCamera : AbstractCamera {
     public float springDamping = 12.0f;
 	private Vector3 velocity = Vector3.zero;
 	
-	/// <summary>
-	/// The controller look horizontal. Value is between -1 and 1
-	/// </summary>
-	public float  lookHorizontal = 0; 
-	private float lookHorizontalActual = 0;
-	private float lookHorizontalVelocity = 0;
+	// horizontal spring damping
 	public bool lookHorizontalSpringDamped = true;
 	public float lookHorizontalSpringStiffness = 36;
 	public float lookHorizontalSpringDamping = 12;
+	private float lookHorizontalActual = 0;
+	private float lookHorizontalVelocity = 0;
+	
+	// vertical spring damping
+	public bool lookVerticalSpringDamped = true;
+	public float lookVerticalSpringStiffness = 36;
+	public float lookVerticalSpringDamping = 12;
+	private float lookVerticalActual = 0;
+	private float lookVerticalVelocity = 0;
+	
+	
 	
 	// Use this for initialization
 	void Start () {
 		lastCameraTargetPosition = transform.position;
-		
 		UpdateIdealSpherical();
 	} 
 	
 	private void UpdateIdealSpherical(){
 		idealSpherical.x = distance;
 		idealSpherical.z = Mathf.Asin(cameraHeight/distance);
+		initialPitch = idealSpherical.z;
 	}
 	
 	/// <summary>
@@ -62,19 +71,19 @@ public class ChaseCamera : AbstractCamera {
 	/// <summary>
 	/// Update is called once per frame
 	/// </summary> 
-	public override void UpdateCameraPosition () {
-		Vector3 position = GetCameraDesiredPosition();
+	public override void UpdateCameraPosition (float lookHorizontal, float lookVertical) {
+		desiredPosition = GetCameraDesiredPosition(lookHorizontal, lookVertical);
 		if (springSmoothingEnabled){
-			transform.position = Damping.SpringDamping(transform.position,position,ref velocity,springStiffness,springDamping);
+			transform.position = Damping.SpringDamping(transform.position,desiredPosition,ref velocity,springStiffness,springDamping);
 		} else {
-			transform.position = position;
+			transform.position = desiredPosition;
 		}
 	}
 	
 	/**
 	 * This is the optimal camera position that the camera moves towards
 	 */
-	public override Vector3 GetCameraDesiredPosition(){
+	public Vector3 GetCameraDesiredPosition(float lookHorizontal, float lookVertical){
 		if (target==null){
 			return lastCameraTargetPosition;
 		}
@@ -85,10 +94,14 @@ public class ChaseCamera : AbstractCamera {
 			if (lookHorizontalSpringDamped){
 				lookHorizontalActual = Damping.SpringDamping(lookHorizontalActual,lookHorizontal, ref lookHorizontalVelocity,
 					lookHorizontalSpringStiffness,lookHorizontalSpringDamping);
-				idealSpherical.y += lookHorizontalActual*(2*Mathf.PI);
-				 
-				// normalize
-				// ???
+				idealSpherical.y += lookHorizontalActual*(Mathf.PI*0.99f);
+			}
+			if (lookVerticalSpringDamped){
+				lookVerticalActual = Damping.SpringDamping(lookVerticalActual,lookVertical, ref lookVerticalVelocity,
+					lookVerticalSpringStiffness,lookVerticalSpringDamping);
+				
+				idealSpherical.z = Mathf.Clamp(initialPitch+lookVerticalActual*Mathf.PI, -Mathf.PI*0.45f, Mathf.PI*0.45f);
+				
 			}
 		} else {
 			if (cameraType==ChaseCameraType.LooseAllowMovementUnderCamra){
@@ -108,7 +121,7 @@ public class ChaseCamera : AbstractCamera {
 	// the performance of this method is a bit on the heavy side, but is only used in the editor
 	public void OnDrawGizmosSelected () {
 		if (target!=null){
-			Gizmos.DrawIcon(GetCameraDesiredPosition(), "camera.png");
+			Gizmos.DrawIcon(desiredPosition, "camera.png");
 			
 			// draw circle to illustrate distance to target
 			Gizmos.color = Color.yellow;

@@ -34,7 +34,7 @@ public class UnitySmoothFollow : AbstractCamera {
 	}
 	
 	// Update is called once per frame
-	public override void UpdateCameraPosition() {
+	public override void UpdateCameraPosition(float lookHorizontal, float lookVertical) {
 		// Early out if we don't have a target
 		if (target == null){
 			return;
@@ -43,7 +43,7 @@ public class UnitySmoothFollow : AbstractCamera {
 		GetCameraDesiredPosition();
 	}
 	
-	public override Vector3 GetCameraDesiredPosition(){
+	public Vector3 GetCameraDesiredPosition(){
 		// Calculate the current rotation angles
 		float wantedRotationAngle = target.eulerAngles.y;
 		float wantedHeight = target.position.y + height;

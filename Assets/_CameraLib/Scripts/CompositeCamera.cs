@@ -19,11 +19,6 @@ public class CompositeCamera : AbstractCamera {
 	// An ease in, ease out animation curve (tangents are all flat)
 	public AnimationCurve curve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 1));
 	
-	public override Vector3 GetCameraDesiredPosition(){
-		// not used here
-		return Vector3.zero;
-	}
-	
 	public override void SetTarget(Transform target){
 		this.target = target;
 		cameras[currentCamera].SetTarget(target);
@@ -84,11 +79,11 @@ public class CompositeCamera : AbstractCamera {
 	}
 	
 	// Update is called once per frame
-	public override void UpdateCameraPosition () {
-		cameras[currentCamera].UpdateCameraPosition();
+	public override void UpdateCameraPosition (float lookHorizontal, float lookVertical) {
+		cameras[currentCamera].UpdateCameraPosition(lookHorizontal, lookVertical);
 		if (lastCamera != -1){
 			interpolationTime += Time.deltaTime;
-			cameras[lastCamera].UpdateCameraPosition();
+			cameras[lastCamera].UpdateCameraPosition(lookHorizontal, lookVertical);
 			lastInterpol = curve.Evaluate(interpolationTime*maxInterpolationTimeInv);
 			transform.position = Vector3.Lerp(cameras[lastCamera].transform.position,cameras[currentCamera].transform.position,lastInterpol);
 			if (interpolationTime>maxInterpolationTime){

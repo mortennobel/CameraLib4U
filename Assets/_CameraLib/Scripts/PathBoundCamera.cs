@@ -55,7 +55,7 @@ public class PathBoundCamera : AbstractCamera {
 	/// <summary>
 	/// Update is called once per frame
 	/// </summary> 
-	public override void UpdateCameraPosition () {
+	public override void UpdateCameraPosition (float lookHorizontal, float lookVertical) {
 		distanceBasedJumpcutTimer += Time.deltaTime;
 		transform.position = GetCameraDesiredPosition();
 	}
@@ -94,7 +94,7 @@ public class PathBoundCamera : AbstractCamera {
 		this.maxDistanceToTarget = d;
 	}
 	
-	public override Vector3 GetCameraDesiredPosition(){
+	public Vector3 GetCameraDesiredPosition(){
 		Vector3 splineVelocity = cameraSplineObject.GetVelocity(currentPositionOnPath);
 		Vector3 distance = transform.position-target.position;
 		

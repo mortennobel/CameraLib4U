@@ -17,15 +17,8 @@ public abstract class AbstractCamera : MonoBehaviour{
 	/// <summary>
 	/// Updates the camera position - by calling the GetCameraDesiredPosition() and smooth the movement.
 	/// </summary>
-	public virtual void UpdateCameraPosition(){
+	public virtual void UpdateCameraPosition(float lookHorizontal, float lookVertical){
 		// empty
-	}
-	
-	/// <summary>
-	/// Gets the camera desired position. (the undamped camera position)
-	/// </summary>
-	public virtual Vector3 GetCameraDesiredPosition(){
-		return Vector3.zero;
 	}
 	
 	/// <summary>
@@ -50,7 +43,9 @@ public abstract class AbstractCamera : MonoBehaviour{
 	/// This method is reponsible for applying lookat
 	/// </summary>
 	void LateUpdate () {
-		UpdateCameraPosition();
+		float lookHorizontal = Input.GetAxis("Horizontal_Alt");
+		float lookVertical = Input.GetAxis("Vertical_Alt");
+		UpdateCameraPosition(lookHorizontal, lookVertical);
 		UpdateLookOrientation();
 	}
 	
