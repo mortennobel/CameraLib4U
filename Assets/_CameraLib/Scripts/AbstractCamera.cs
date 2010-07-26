@@ -13,12 +13,29 @@ public abstract class AbstractCamera : MonoBehaviour{
 	public bool smoothLookAtEnabled = true;
 	
 	public Transform target;
+	public float targetMinimumRenderingDistance = 0.5f;
 	
 	/// <summary>
 	/// Updates the camera position - by calling the GetCameraDesiredPosition() and smooth the movement.
 	/// </summary>
 	public virtual void UpdateCameraPosition(float lookHorizontal, float lookVertical){
 		// empty
+	}
+	
+	
+	private bool targetRenderingEnabled;
+	private void TargetRendering(bool enabled){
+		if (enabled==targetRenderingEnabled){
+			return;
+		}
+		targetRenderingEnabled = enabled;
+		foreach (Renderer r in target.GetComponentsInChildren<Renderer>()){
+			r.enabled = enabled;
+		}
+		Renderer localR = target.GetComponent<Renderer>();
+		if (localR != null){
+			localR.enabled = enabled;
+		}
 	}
 	
 	/// <summary>
@@ -47,6 +64,12 @@ public abstract class AbstractCamera : MonoBehaviour{
 		float lookVertical = Input.GetAxis("Vertical_Alt");
 		UpdateCameraPosition(lookHorizontal, lookVertical);
 		UpdateLookOrientation();
+		
+		
+		float targetDistanceSqr = (transform.position-target.position).magnitude;
+		bool targetRenderingEnabled = (targetDistanceSqr>targetMinimumRenderingDistance);
+		TargetRendering(targetRenderingEnabled);
+		Debug.Log("targetDistanceSqr "+targetDistanceSqr+" enabled "+targetRenderingEnabled);
 	}
 	
 	public virtual void UpdateLookOrientation(){

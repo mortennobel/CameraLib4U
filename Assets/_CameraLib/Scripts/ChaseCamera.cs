@@ -17,6 +17,9 @@ public class ChaseCamera : AbstractCamera {
 	
 	private Vector3 desiredPosition = Vector3.zero;
 	
+	// target
+	public float targetHeight = 0.5f;
+	
 	// movement spring
 	public bool springSmoothingEnabled = true; 
 	/// Physics coefficient which controls the influence of the camera's position
@@ -46,12 +49,11 @@ public class ChaseCamera : AbstractCamera {
 	// virtual camera collisions test (See "Third-Person Camera Navigasion" Jonathan Stone, Game Programming Gems 4)
 	public bool virtualCameraCollisionTest = true;
 	public float virtualCameraCollisionRadius = 0.5f;
-	public float targetHeight = 0.5f;
-	
+	public LayerMask virtualCameraCollisionLayerMask = new LayerMask();
+		
 	public bool[] raycastResult = new bool[3];
 	private Vector3[] raycastOffset = new Vector3[3];
 	private int raycastCounter = 0;
-	
 	
 	// Use this for initialization
 	void Start () {
@@ -132,16 +134,17 @@ public class ChaseCamera : AbstractCamera {
 			if (raycastCounter>2){
 				raycastCounter = 0;
 			}
-			raycastResult[raycastCounter] = Physics.Raycast(target.position+raycastOffset[raycastCounter],direction,distance);
-			// todo - add layermast
-			RaycastHit hit = new RaycastHit();
-			bool isHit = Physics.SphereCast(target.position,virtualCameraCollisionRadius,direction,out hit, distance);  
-			if (isHit){
-				if (hit.distance<distance*0.25f && (!raycastResult[0] || !raycastResult[1]|| !raycastResult[2])){
+			raycastResult[raycastCounter] = Physics.Raycast(target.position+raycastOffset[raycastCounter],direction,distance, virtualCameraCollisionLayerMask.value);
+			
+			RaycastHit hitInfo = new RaycastHit(); 
+			bool hit = Physics.SphereCast(target.position,virtualCameraCollisionRadius,direction, out hitInfo, distance/*,virtualCameraCollisionLayerMask.value*/);  
+			if (hit){
+				// todo search through hits
+				/*if (hitInfo.distance<distance*0.25f && (!raycastResult[0] || !raycastResult[1]|| !raycastResult[2])){
 					idealSpherical.x = distance;
 				} else {
-					idealSpherical.x = hit.distance;
-				}
+				*/	idealSpherical.x = hitInfo.distance;
+				// }
 			} else {
 				idealSpherical.x = distance;
 			}
@@ -161,6 +164,12 @@ public class ChaseCamera : AbstractCamera {
 				Gizmos.color = Color.green;
 				Gizmos.DrawWireSphere (transform.position, virtualCameraCollisionRadius);
 			}
+			
+			Gizmos.color = Color.blue;
+			Gizmos.DrawLine(target.position+Vector3.up*(targetHeight*0.5f), target.position+Vector3.up*(targetHeight*0.5f));
+			
+			Gizmos.color = Color.magenta;
+			Gizmos.DrawWireSphere(target.position, targetMinimumRenderingDistance);
 		}	
 	}
 }

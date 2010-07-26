@@ -50,6 +50,7 @@ public class CompositeCamera : AbstractCamera {
 			lastCamera=-1;
 			smoothLookAtEnabled = cameras[newCamera].smoothLookAtEnabled;
 			smoothLookAtDamping = cameras[newCamera].smoothLookAtDamping;
+			targetMinimumRenderingDistance = cameras[newCamera].targetMinimumRenderingDistance;
 		}
 		currentCamera = newCamera;
 		cameras[currentCamera].SetTarget(target);
@@ -75,7 +76,8 @@ public class CompositeCamera : AbstractCamera {
 		}
 		cameras[currentCamera].InitCamera();
 		smoothLookAtEnabled = cameras[currentCamera].smoothLookAtEnabled;
-		smoothLookAtDamping = cameras[currentCamera].smoothLookAtDamping;	
+		smoothLookAtDamping = cameras[currentCamera].smoothLookAtDamping;
+		targetMinimumRenderingDistance = cameras[currentCamera].targetMinimumRenderingDistance;
 	}
 	
 	// Update is called once per frame
@@ -90,6 +92,7 @@ public class CompositeCamera : AbstractCamera {
 				lastCamera = -1;
 				smoothLookAtDamping = cameras[currentCamera].smoothLookAtDamping;
 				smoothLookAtEnabled = cameras[currentCamera].smoothLookAtEnabled;
+				targetMinimumRenderingDistance = cameras[currentCamera].targetMinimumRenderingDistance;
 			} 
 		} else {
 			transform.position = cameras[currentCamera].transform.position;
