@@ -21,15 +21,15 @@ public class ChaseCamera : AbstractCamera {
 	public float targetHeight = 0.5f;
 	
 	// movement spring
-	public bool springSmoothingEnabled = true; 
+	public bool movementSpringDampingEnabled = true; 
 	/// Physics coefficient which controls the influence of the camera's position
     /// over the spring force. The stiffer the spring, the closer it will stay to
     /// the chased object.
     /// Also known as SpringConstant
-    public float springStiffness = 36.0f;
+    public float movementSpringStiffness = 36.0f;
     /// Physics coefficient which approximates internal friction of the spring.
     /// Sufficient damping will prevent the spring from oscillating infinitely.
-    public float springDamping = 12.0f;
+    public float movementSpringDamping = 12.0f;
 	private Vector3 velocity = Vector3.zero;
 	
 	// horizontal spring damping
@@ -89,8 +89,8 @@ public class ChaseCamera : AbstractCamera {
 	/// </summary> 
 	public override void UpdateCameraPosition (float lookHorizontal, float lookVertical) {
 		desiredPosition = GetCameraDesiredPosition(lookHorizontal, lookVertical);
-		if (springSmoothingEnabled){
-			transform.position = Damping.SpringDamping(transform.position,desiredPosition,ref velocity,springStiffness,springDamping);
+		if (movementSpringDampingEnabled){
+			transform.position = Damping.SpringDamping(transform.position,desiredPosition,ref velocity,movementSpringStiffness,movementSpringDamping);
 		} else {
 			transform.position = desiredPosition;
 		}

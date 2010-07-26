@@ -65,17 +65,17 @@ public class ChaseCameraGUI : Editor {
 	    	EditorGUILayout.EndHorizontal ();
 		}
 		
-		springFoldout =EditorGUILayout.Foldout(springFoldout, "Spring damping");
+		springFoldout =EditorGUILayout.Foldout(springFoldout, "Movement spring damping");
 		if (springFoldout){
 			EditorGUILayout.BeginHorizontal ();
-        		chaseCamera.springSmoothingEnabled = 
-					EditorGUILayout.Toggle("Enabled",chaseCamera.springSmoothingEnabled);
+        		chaseCamera.movementSpringDampingEnabled = 
+					EditorGUILayout.Toggle("Enabled",chaseCamera.movementSpringDampingEnabled);
     		EditorGUILayout.EndHorizontal ();
 		
 			
-			if (chaseCamera.springSmoothingEnabled){
-				EditorGUISpringDampingStat(ref chaseCamera.springStiffness, 
-			                                                  ref chaseCamera.springDamping);
+			if (chaseCamera.movementSpringDampingEnabled){
+				EditorGUISpringDampingStat(ref chaseCamera.movementSpringStiffness, 
+			                                                  ref chaseCamera.movementSpringDamping);
 			}
 		}
 		if (chaseCamera.cameraType==ChaseCamera.ChaseCameraType.StayBehind){
@@ -86,7 +86,7 @@ public class ChaseCameraGUI : Editor {
 					EditorGUILayout.Toggle("Enabled",chaseCamera.lookHorizontalSpringDamped);
 	        	EditorGUILayout.EndHorizontal ();
 					
-				if (chaseCamera.springSmoothingEnabled){
+				if (chaseCamera.movementSpringDampingEnabled){
 					EditorGUISpringDampingStat(ref chaseCamera.lookHorizontalSpringStiffness, 
 					                                                  ref chaseCamera.lookHorizontalSpringDamping);
 				}

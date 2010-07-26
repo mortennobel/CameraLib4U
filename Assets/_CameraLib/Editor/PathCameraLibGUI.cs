@@ -46,16 +46,16 @@ public class PathCameraLibGUI : Editor {
 	    	pathCamera.minTimeBetweenDistancebasedJumpcut = EditorGUILayout.FloatField("Min time between",pathCamera.minTimeBetweenDistancebasedJumpcut);
 	    	EditorGUILayout.EndHorizontal ();
 		}
-		springFoldout =EditorGUILayout.Foldout(springFoldout, "Spring damping");
+		springFoldout =EditorGUILayout.Foldout(springFoldout, "Movement spring damping");
 		if (springFoldout){
 			EditorGUILayout.BeginHorizontal ();
-        	pathCamera.springSmoothingEnabled = EditorGUILayout.Toggle("Enabled",pathCamera.springSmoothingEnabled);
+        	pathCamera.movementSpringDampingEnabled = EditorGUILayout.Toggle("Enabled",pathCamera.movementSpringDampingEnabled);
         	EditorGUILayout.EndHorizontal ();
 			
 				
-			if (pathCamera.springSmoothingEnabled){
-				ChaseCameraGUI.EditorGUISpringDampingStat(ref pathCamera.springStiffness, 
-				                                                  ref pathCamera.springDamping);
+			if (pathCamera.movementSpringDampingEnabled){
+				ChaseCameraGUI.EditorGUISpringDampingStat(ref pathCamera.movementSpringStiffness, 
+				                                                  ref pathCamera.movementSpringDamping);
 			}
 		}
 		lookAtDamping =EditorGUILayout.Foldout(lookAtDamping, "LookAt damping");
