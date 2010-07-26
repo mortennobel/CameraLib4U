@@ -63,15 +63,10 @@ public class ChaseCameraGUI : Editor {
 	    	EditorGUILayout.PrefixLabel ("CollisionRadius");
 	    	chaseCamera.virtualCameraCollisionRadius = EditorGUILayout.FloatField(chaseCamera.virtualCameraCollisionRadius);
 	    	EditorGUILayout.EndHorizontal ();
-			
-			EditorGUILayout.BeginHorizontal ();
-			chaseCamera.virtualCameraCollisionLayerMask.value = EditorGUILayout.LayerField("Collision layer", chaseCamera.virtualCameraCollisionLayerMask.value);
-			EditorGUILayout.EndHorizontal ();
 		}
 		
 		springFoldout =EditorGUILayout.Foldout(springFoldout, "Spring damping");
 		if (springFoldout){
-			
 			EditorGUILayout.BeginHorizontal ();
         		chaseCamera.springSmoothingEnabled = 
 					EditorGUILayout.Toggle("Enabled",chaseCamera.springSmoothingEnabled);

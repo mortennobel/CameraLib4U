@@ -49,7 +49,6 @@ public class ChaseCamera : AbstractCamera {
 	// virtual camera collisions test (See "Third-Person Camera Navigasion" Jonathan Stone, Game Programming Gems 4)
 	public bool virtualCameraCollisionTest = true;
 	public float virtualCameraCollisionRadius = 0.5f;
-	public LayerMask virtualCameraCollisionLayerMask = new LayerMask();
 		
 	public bool[] raycastResult = new bool[3];
 	private Vector3[] raycastOffset = new Vector3[3];
@@ -80,6 +79,9 @@ public class ChaseCamera : AbstractCamera {
 	
 	public override void InitCamera(){
 		base.InitCamera();
+		// set the camera position to desiered position and velocity to zero
+		transform.position = GetCameraDesiredPosition(0,0);
+		velocity = Vector3.zero;
 	}
 	
 	/// <summary>
@@ -134,17 +136,17 @@ public class ChaseCamera : AbstractCamera {
 			if (raycastCounter>2){
 				raycastCounter = 0;
 			}
-			raycastResult[raycastCounter] = Physics.Raycast(target.position+raycastOffset[raycastCounter],direction,distance, virtualCameraCollisionLayerMask.value);
+			raycastResult[raycastCounter] = Physics.Raycast(target.position+raycastOffset[raycastCounter],direction,distance);
 			
 			RaycastHit hitInfo = new RaycastHit(); 
-			bool hit = Physics.SphereCast(target.position,virtualCameraCollisionRadius,direction, out hitInfo, distance/*,virtualCameraCollisionLayerMask.value*/);  
+			bool hit = Physics.SphereCast(target.position,virtualCameraCollisionRadius,direction, out hitInfo, distance);  
 			if (hit){
 				// todo search through hits
-				/*if (hitInfo.distance<distance*0.25f && (!raycastResult[0] || !raycastResult[1]|| !raycastResult[2])){
+				if (hitInfo.distance<distance*0.25f && (!raycastResult[0] || !raycastResult[1]|| !raycastResult[2])){
 					idealSpherical.x = distance;
 				} else {
-				*/	idealSpherical.x = hitInfo.distance;
-				// }
+					idealSpherical.x = hitInfo.distance;
+				}
 			} else {
 				idealSpherical.x = distance;
 			}
@@ -166,8 +168,8 @@ public class ChaseCamera : AbstractCamera {
 			}
 			
 			Gizmos.color = Color.blue;
-			Gizmos.DrawLine(target.position+Vector3.up*(targetHeight*0.5f), target.position+Vector3.up*(targetHeight*0.5f));
-			
+			Gizmos.DrawLine(target.position+Vector3.up*(targetHeight*0.5f), target.position+Vector3.up*(-targetHeight*0.5f));
+						
 			Gizmos.color = Color.magenta;
 			Gizmos.DrawWireSphere(target.position, targetMinimumRenderingDistance);
 		}	
