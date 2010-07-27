@@ -9,6 +9,7 @@ public class ChaseCameraGUI : Editor {
 	private bool lookAtDamping = false;
 	private bool lookHorizontal = false;
 	private bool lookVertical = false;
+	private bool moveBackSpringFoldout = false;
 	private bool debug = false;
 
 	public override void OnInspectorGUI ()
@@ -63,6 +64,13 @@ public class ChaseCameraGUI : Editor {
 	    	EditorGUILayout.PrefixLabel ("CollisionRadius");
 	    	chaseCamera.virtualCameraCollisionRadius = EditorGUILayout.FloatField(chaseCamera.virtualCameraCollisionRadius);
 	    	EditorGUILayout.EndHorizontal ();
+			
+			moveBackSpringFoldout = EditorGUILayout.Foldout(moveBackSpringFoldout, "Moveback spring");
+			if (moveBackSpringFoldout){
+				EditorGUISpringDampingStat(ref chaseCamera.vccMoveBackSpringStiffness, 
+			                                                  ref chaseCamera.vccMoveBackSpringDamping);
+				EditorGUILayout.Separator();
+			}
 		}
 		
 		springFoldout =EditorGUILayout.Foldout(springFoldout, "Movement spring damping");

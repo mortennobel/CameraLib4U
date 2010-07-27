@@ -49,6 +49,11 @@ public class ChaseCamera : AbstractCamera {
 	// virtual camera collisions test (See "Third-Person Camera Navigasion" Jonathan Stone, Game Programming Gems 4)
 	public bool virtualCameraCollisionTest = true;
 	public float virtualCameraCollisionRadius = 0.5f;
+	
+	// virtualCameraCollision move backwards damping
+	public float vccMoveBackSpringStiffness = 36f;
+	public float vccMoveBackSpringDamping = 24f;
+	public float vccMoveBackVelocity = 0;
 		
 	public bool[] raycastResult = new bool[3];
 	private Vector3[] raycastOffset = new Vector3[3];
@@ -140,15 +145,20 @@ public class ChaseCamera : AbstractCamera {
 			
 			RaycastHit hitInfo = new RaycastHit(); 
 			bool hit = Physics.SphereCast(target.position,virtualCameraCollisionRadius,direction, out hitInfo, distance);  
-			if (hit){
-				// todo search through hits
-				if (hitInfo.distance<distance*0.25f && (!raycastResult[0] || !raycastResult[1]|| !raycastResult[2])){
-					idealSpherical.x = distance;
-				} else {
-					idealSpherical.x = hitInfo.distance;
-				}
+			
+			float newCameraDistance;
+			// allow partially occluded object if hit distance is less than 25% of pref. distance
+			if (hit && !(hitInfo.distance<distance*0.25f && (!raycastResult[0] || !raycastResult[1]|| !raycastResult[2]))){
+				newCameraDistance = hitInfo.distance;
 			} else {
-				idealSpherical.x = distance;
+				newCameraDistance = distance;
+			}
+			
+			if (newCameraDistance<idealSpherical.x){
+				idealSpherical.x = newCameraDistance;
+				vccMoveBackVelocity = 0;
+			} else {
+				idealSpherical.x = Damping.SpringDamping(idealSpherical.x, newCameraDistance,ref vccMoveBackVelocity, vccMoveBackSpringStiffness,vccMoveBackSpringDamping);
 			}
 		}
 		return lastCameraTargetPosition;

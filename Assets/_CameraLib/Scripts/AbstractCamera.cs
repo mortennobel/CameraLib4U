@@ -7,13 +7,18 @@ using System.Collections;
 /// 
 /// The default behavior is first update position (UpdateCameraPosition() method) and then update rotation 
 /// (UpdateLookRotation() method).
+/// 
+/// If closer than targetMinimumRenderingDistance, all Renderer components in target and its children are disabled temporary.
 /// </summary>
 public abstract class AbstractCamera : MonoBehaviour{
 	public float smoothLookAtDamping = 6.0f;
 	public bool smoothLookAtEnabled = true;
 	
 	public Transform target;
+	// if closer than targetMinimumRenderingDistance, all Renderer components in target and its children are disabled temporary.
 	public float targetMinimumRenderingDistance = 0.5f;
+	
+	private bool targetRenderingEnabled;
 	
 	/// <summary>
 	/// Updates the camera position - by calling the GetCameraDesiredPosition() and smooth the movement.
@@ -22,12 +27,7 @@ public abstract class AbstractCamera : MonoBehaviour{
 		// empty
 	}
 	
-	
-	private bool targetRenderingEnabled;
 	private void TargetRendering(bool enabled){
-		if (enabled==targetRenderingEnabled){
-			return;
-		}
 		targetRenderingEnabled = enabled;
 		foreach (Renderer r in target.GetComponentsInChildren<Renderer>()){
 			r.enabled = enabled;
@@ -68,8 +68,9 @@ public abstract class AbstractCamera : MonoBehaviour{
 		
 		float targetDistanceSqr = (transform.position-target.position).magnitude;
 		bool targetRenderingEnabled = (targetDistanceSqr>targetMinimumRenderingDistance);
-		TargetRendering(targetRenderingEnabled);
-		Debug.Log("targetDistanceSqr "+targetDistanceSqr+" enabled "+targetRenderingEnabled);
+		if (this.targetRenderingEnabled != targetRenderingEnabled){
+			TargetRendering(targetRenderingEnabled);
+		}
 	}
 	
 	public virtual void UpdateLookOrientation(){
