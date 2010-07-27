@@ -143,16 +143,17 @@ public class ChaseCamera : AbstractCamera {
 			}
 			raycastResult[raycastCounter] = Physics.Raycast(target.position+raycastOffset[raycastCounter],direction,distance);
 			
-			RaycastHit hitInfo = new RaycastHit(); 
-			bool hit = Physics.SphereCast(target.position,virtualCameraCollisionRadius,direction, out hitInfo, distance);  
+			RaycastHit[] hitInfo = Physics.SphereCastAll(target.position,virtualCameraCollisionRadius,direction, distance);  
 			
-			float newCameraDistance;
+			float newCameraDistance = distance;
 			// allow partially occluded object if hit distance is less than 25% of pref. distance
-			if (hit && !(hitInfo.distance<distance*0.25f && (!raycastResult[0] || !raycastResult[1]|| !raycastResult[2]))){
-				newCameraDistance = hitInfo.distance;
-			} else {
-				newCameraDistance = distance;
-			}
+			if (hitInfo.Length>0){
+				for (int i=0;i<hitInfo.Length;i++){
+					if (!(hitInfo[i].distance<distance*0.25f && (!raycastResult[0] || !raycastResult[1]|| !raycastResult[2]))){
+						newCameraDistance = hitInfo[i].distance;		
+					}
+				}
+			} 
 			
 			if (newCameraDistance<idealSpherical.x){
 				idealSpherical.x = newCameraDistance;
