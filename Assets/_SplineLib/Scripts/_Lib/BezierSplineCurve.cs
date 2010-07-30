@@ -44,7 +44,9 @@ public class BezierSplineCurve : SplineCurve {
 	}
 	
 	public void InitSmoothTangents(Vector3[] controlPoints){
-		float[] time = new float[controlPoints.Length];
+		int usableLength = controlPoints.Length-(controlPoints.Length%2);
+		int actualLength = (usableLength)/2;
+		float[] time = new float[actualLength];
 		for (int i=0;i<time.Length;i++){
 			time[i] = i;
 		}
@@ -57,13 +59,15 @@ public class BezierSplineCurve : SplineCurve {
 	/// &lt;cp, acp, acp, cp, acp, cp, ... cp, acp, cp&gt;
 	/// </summary>
 	public void InitSmoothTangents(Vector3[] controlPoints, float[] time){
+		int usableLength = controlPoints.Length-(controlPoints.Length%2);
+		int actualLength = (usableLength)/2;
+		
 		if (Debug.isDebugBuild) {
-			if (time.Length!=controlPoints.Length){
-				throw new Exception("Time length should equal controlpoints length");
+			if (time.Length!= actualLength){
+				Debug.Log("Time should have the length "+actualLength);
 			}
 		}
-		int usableLength = controlPoints.Length-(controlPoints.Length%2);
-		this.controlPoints = new Vector3[(usableLength)/2];
+		this.controlPoints = new Vector3[actualLength];
 		this.time = new float[this.controlPoints.Length];
 		Array.Copy(time, this.time, time.Length);
 		this.approximatingControlPoints = new Vector3[(this.controlPoints.Length-1)*2];

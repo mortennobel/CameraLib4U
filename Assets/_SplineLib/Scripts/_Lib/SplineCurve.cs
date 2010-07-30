@@ -114,20 +114,20 @@ public abstract class SplineCurve {
 		float length = 0;
 		if (time>this.time[0]){
 			if (time>=this.time[this.time.Length-1]){
-				time = valueToLengthMapping[valueToLengthMapping.Length-1].archLength;
+				length = valueToLengthMapping[valueToLengthMapping.Length-1].archLength;
 			} else {
 				// find the segment where time is between
 				int segment = 0;
 				// this can be improved by using binary search
-				for (;valueToLengthMapping[segment+1].archLength<length;segment++){
+				for (;valueToLengthMapping[segment+1].parameterValue<time;segment++){
 					// do nothing
 				}
-				float fraction = (length-valueToLengthMapping[segment].archLength)/(valueToLengthMapping[segment+1].archLength-valueToLengthMapping[segment].archLength);
-				time = Mathf.Lerp(valueToLengthMapping[segment].parameterValue,valueToLengthMapping[segment+1].parameterValue,fraction);
+				float fraction = (time-valueToLengthMapping[segment].parameterValue)/(valueToLengthMapping[segment+1].parameterValue-valueToLengthMapping[segment].parameterValue);
+				length = Mathf.Lerp(valueToLengthMapping[segment].archLength,valueToLengthMapping[segment+1].archLength,fraction);
 			}
 		}
 		
-		return -1;
+		return length;
 	}
 	
 	public abstract Vector3 GetPosition(float f);

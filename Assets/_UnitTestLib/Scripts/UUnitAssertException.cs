@@ -7,31 +7,23 @@ public class UUnitAssertException : Exception {
 	//private T actual;
 	private string msg;
 	public UUnitAssertException(object expected, object actual, string msg){
-		this.expected = expected;
-		this.actual = actual;
+		this.Expected = expected;
+		this.Actual = actual;
 		this.msg = msg;
 	}	
 	
 	
-	public object actual {
-		get{
-			return actual;
-		}
-		set{
-			actual =value;
-		}
+	public object Actual {
+		get;
+		set;
 	}
 	
-	public object expected {
-		get{
-			return expected;
-		}
-		set{
-			expected =value;
-		}
+	public object Expected {
+		get;
+		set;
 	}
 	
 	public string Details(){
-		return "UUnitAssertException: Expected: "+expected+" actual "+actual+" msg: "+msg+" \n"+base.ToString();
+		return "UUnitAssertException: Expected: "+Expected+" actual "+Actual+" msg: "+msg+" \n"+base.ToString();
 	}
 }

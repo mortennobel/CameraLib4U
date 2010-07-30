@@ -80,13 +80,15 @@ public class PathBoundCamera : AbstractCamera {
 		for (int i=0;i<controlpoints.Length;i++){
 			float controlpointLength =(controlpoints[i]-target.position).sqrMagnitude;
 			if (minDistance > controlpointLength){
-				minDistance =controlpointLength;
+				minDistance = controlpointLength;
 				closestControlPoint = i;
 			}
 		}
+		
+		float lengthAtControlPoint = cameraSplineObject.GetLengthAtTime(cameraSplineObject.time[closestControlPoint]);
 		transform.position = controlpoints[closestControlPoint];
-		currentPositionOnPath = cameraSplineObject.time[closestControlPoint];
-		movementDesiredPosition = currentPositionOnPath;
+		currentPositionOnPath = lengthAtControlPoint;
+		movementDesiredPosition = lengthAtControlPoint;
 		movementVelocity = 0f;
 		distanceBasedJumpcutTimer = 0;
 	}
@@ -96,14 +98,15 @@ public class PathBoundCamera : AbstractCamera {
 	}
 	
 	public Vector3 GetCameraDesiredPosition(){
-		Vector3 splineVelocity = cameraSplineObject.GetVelocity(currentPositionOnPath);
+		float timeAtLength = cameraSplineObject.GetTimeByLength(currentPositionOnPath);
+		Vector3 splineVelocity = cameraSplineObject.GetVelocity(timeAtLength);
 		Vector3 distance = transform.position-target.position;
 		
 		if (distance.sqrMagnitude <= maxDistanceToTarget*maxDistanceToTarget){
 			// don't move camera, since target is closer than preferredDistanceToCamera
 			movementDesiredPosition = currentPositionOnPath = Damping.SpringDamping(currentPositionOnPath, currentPositionOnPath, ref movementVelocity,movementSpringStiffness, movementSpringDamping);
-			currentPositionOnPath = Mathf.Clamp(movementDesiredPosition,0,cameraSplineObject.totalTime);
-			return cameraSplineObject.GetPosition(currentPositionOnPath);
+			currentPositionOnPath = Mathf.Clamp(movementDesiredPosition,0,cameraSplineObject.totalLength);
+			return cameraSplineObject.GetPositionByLength(currentPositionOnPath);
 		} 	
 		
 		if (distance.sqrMagnitude > maxDistanceToJumpCut*maxDistanceToJumpCut && 
@@ -128,8 +131,9 @@ public class PathBoundCamera : AbstractCamera {
 		movementDesiredPosition = Damping.SpringDamping(currentPositionOnPath, movementDesiredPosition, ref velocityCopy,movementSpringStiffness, movementSpringDamping);
 		
 		// make sure if the desired position will not pull the camera backwards
-		Vector3 newSplineVelocity = cameraSplineObject.GetVelocity(movementDesiredPosition);
-		Vector3 newDistance = cameraSplineObject.GetPosition(movementDesiredPosition)-target.position;
+		float movementDesiredPositionLength = cameraSplineObject.GetTimeByLength(movementDesiredPosition);
+		Vector3 newSplineVelocity = cameraSplineObject.GetVelocity(movementDesiredPositionLength);
+		Vector3 newDistance = cameraSplineObject.GetPosition(movementDesiredPositionLength)-target.position;
 		float newDotProduct = Vector3.Dot(newSplineVelocity, newDistance);
 		if (newDotProduct>0==dotProduct>0){
 			// only update velocity if movement
@@ -138,9 +142,9 @@ public class PathBoundCamera : AbstractCamera {
 			// note that this update velocity directly
 			movementDesiredPosition = Damping.SpringDamping(currentPositionOnPath, currentPositionOnPath, ref movementVelocity,movementSpringStiffness, movementSpringDamping);
 		}
-		currentPositionOnPath = Mathf.Clamp(movementDesiredPosition,0,cameraSplineObject.totalTime);
+		currentPositionOnPath = Mathf.Clamp(movementDesiredPosition,0,cameraSplineObject.totalLength);
 			
-		return cameraSplineObject.GetPosition(currentPositionOnPath);
+		return cameraSplineObject.GetPositionByLength(currentPositionOnPath);
 	}
 	
 	public override void SetTarget(Transform target){
@@ -154,7 +158,7 @@ public class PathBoundCamera : AbstractCamera {
 	public void OnDrawGizmosSelected(){
 		if (cameraSplineObject!=null){
 			Gizmos.color = Color.white;
-    		Gizmos.DrawWireSphere (cameraSplineObject.GetPosition(movementDesiredPosition), 0.2f);
+    		Gizmos.DrawWireSphere (cameraSplineObject.GetPositionByLength(movementDesiredPosition), 0.2f);
 		}
 	}
 }

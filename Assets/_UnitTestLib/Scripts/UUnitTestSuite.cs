@@ -18,8 +18,6 @@ public class UUnitTestSuite {
 		testCases.Add(type);
 	}
 	
-	public static bool success = true;
-	
 	public UUnitTestResult RunAll(){
 		UUnitTestResult res = new UUnitTestResult();
 		foreach (Type t in testCases){
@@ -30,13 +28,12 @@ public class UUnitTestSuite {
 					
 	        		for (int i=0;i<p.Length;i++) {
 						if (p[i].GetParameters().Length==0){
-							
 							DateTime startTime1 = DateTime.Now; 
 							DateTime stopTime1 = DateTime.Now;
 							
 							UUnitAssertException ae = null;
 							string errMsg = null;
-							success = true;
+							bool success = true;
 							try {
 								UUnitTestCase unitTest = (UUnitTestCase)p[i].Invoke(new object[0]);	
 								unitTest.Setup();
