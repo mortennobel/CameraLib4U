@@ -1,21 +1,22 @@
 using UnityEngine;
 using System.Collections;
+using System;
 
 public class UUnitAssert  {
 
 	public static void True(bool boolean, string msg){
 		if (boolean) return; 
-		throw new UUnitAssertException(true, false, msg);
+		Error(true, false, msg);
 	}
 	
 	public static void False(bool boolean, string msg){
 		if (!boolean) return; 
-		throw new UUnitAssertException(false, true, msg);
+		Error(false, true, msg);
 	}
 		
 	public static void Equals(int expected, int actual,string msg){
 		if (expected == actual) return;
-		throw new UUnitAssertException(expected, actual, msg);
+		Error(expected, actual, msg);
 	}
 	
 	public static void Equals(float expected, float actual){
@@ -32,7 +33,7 @@ public class UUnitAssert  {
 	
 	public static void Equals(float expected, float actual,float delta,string msg){
 		if (Mathf.Abs(expected-actual)<=delta) return;
-		throw new UUnitAssertException(expected, actual, msg);
+		Error(expected, actual, msg);
 	}
 	
 	public static new void Equals(object expected, object actual){
@@ -41,7 +42,7 @@ public class UUnitAssert  {
 	
 	public static void Equals(object expected, object actual, string msg){
 		if (expected==null && actual == null || expected.Equals(actual)) return;
-		throw new UUnitAssertException(expected, actual, msg);
+		Error(expected, actual, msg);
 	}
 	
 	public static new void Equals(Vector3 expected, Vector3 actual){
@@ -61,7 +62,7 @@ public class UUnitAssert  {
 		if (Mathf.Abs(dif.x)<delta &&
 		    Mathf.Abs(dif.y)<delta &&
 		    Mathf.Abs(dif.z)<delta) return;
-		throw new UUnitAssertException(expected, actual, msg);
+		Error(expected, actual, msg);
 	}
 	
 	public static void Same(object expected, object actual){
@@ -70,7 +71,7 @@ public class UUnitAssert  {
 	
 	public static void Same(object expected, object actual, string msg){
 		if (expected == actual) return;
-		throw new UUnitAssertException(expected, actual, msg);
+		Error(expected, actual, msg);
 	}
 
 	public static void IsNull(object actual){
@@ -79,7 +80,7 @@ public class UUnitAssert  {
 	
 	public static void IsNull(object actual, string msg){
 		if (actual==null) return;
-		throw new UUnitAssertException(null, actual, msg);
+		Error(null, actual, msg);
 	}
 	
 	public static void IsNotNull(object actual){
@@ -88,6 +89,16 @@ public class UUnitAssert  {
 	
 	public static void IsNotNull(object actual, string msg){
 		if (actual!=null) return;
-		throw new UUnitAssertException("not null", actual, msg);
+		Error("not null", actual, msg);
+	}
+	
+	private static void Error(object expected, object actual, string msg){
+		Exception e = new Exception();
+		String errMsg = "UUnitAssertException: Expected: "+expected+" actual "+actual+" msg: "+msg;
+		// workaround for crashbug in Unity
+		Debug.Log(errMsg); 
+		Debug.Log(e.StackTrace);
+		UUnitTestSuite.success = false;
+		// throw new UUnitAssertException(expected, actual, msg);
 	}
 }

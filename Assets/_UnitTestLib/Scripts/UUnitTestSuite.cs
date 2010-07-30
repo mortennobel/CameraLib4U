@@ -18,6 +18,8 @@ public class UUnitTestSuite {
 		testCases.Add(type);
 	}
 	
+	public static bool success = true;
+	
 	public UUnitTestResult RunAll(){
 		UUnitTestResult res = new UUnitTestResult();
 		foreach (Type t in testCases){
@@ -34,7 +36,7 @@ public class UUnitTestSuite {
 							
 							UUnitAssertException ae = null;
 							string errMsg = null;
-							bool success = true;
+							success = true;
 							try {
 								UUnitTestCase unitTest = (UUnitTestCase)p[i].Invoke(new object[0]);	
 								unitTest.Setup();
@@ -42,7 +44,7 @@ public class UUnitTestSuite {
 								m.Invoke(unitTest, new object[0]);
 								stopTime1 = DateTime.Now;
 								unitTest.TearDown();
-							}catch (System.Reflection.TargetInvocationException e){
+							} catch (System.Reflection.TargetInvocationException e){
 								stopTime1 = DateTime.Now;
 								ae = e.InnerException as UUnitAssertException;
 								success = false;

@@ -3,16 +3,24 @@ using System.Collections;
 using System;
 
 public class LinearSplineCurve : SplineCurve {
-	public void Init(Vector3[] controlPoints) {
+	public void Init(Vector3[] controlPoints, float[] time) {
 		if (Debug.isDebugBuild) {
 			if (controlPoints.Length<2){
 				throw new Exception("Minimum number of controlpoints is two");
-			}			
+			}
+			if (time.Length!=controlPoints.Length){
+				throw new Exception("Time length should equal controlpoint length");
+			}
+			for (int i=1;i<time.Length;i++){
+				if (time[i-1] >= time[i]){
+					throw new Exception ("Time should be increasing");
+				}
+			}
 		}
 		this.controlPoints = new Vector3[controlPoints.Length];
 		this.time = new float[controlPoints.Length];
 		Array.Copy(controlPoints,this.controlPoints,controlPoints.Length);
-		calculateSegmentLength();
+		Array.Copy(time, this.time, time.Length);
 	}
 			
 	public override Vector3 GetPosition(float time){
@@ -28,7 +36,7 @@ public class LinearSplineCurve : SplineCurve {
 	/// Note: this only returns the correct direction (for line segments) - may not return the correct length.
 	/// </summary>
 	public override Vector3 GetVelocity(float time){
-		int i =GetSegmentIndex(time);
+		int i = GetSegmentIndex(time);
 		return controlPoints[i+1]-controlPoints[i];
 	}
 }

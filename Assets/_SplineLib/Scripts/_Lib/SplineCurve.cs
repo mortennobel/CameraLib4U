@@ -3,12 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
+
 public abstract class SplineCurve {
 	private float[] mTime;
 	private Vector3[] mControlPoints;
-	public float lengthPrecision = 0.005f;
+	public float lengthPrecision = 0.001f;
 	public List<float> renderPoints = new List<float>();
 	private static int MAX_RECURSION_DEPTH = 20;
+	
+	private struct ParameterValueToArcLength{
+		public float parameterValue;
+		public float archLength;
+		public ParameterValueToArcLength(float parameterValue, float archLength){
+			this.parameterValue = parameterValue;
+			this.archLength = archLength;
+		}
+	}
+	
+	private ParameterValueToArcLength[] valueToLengthMapping;
 	
 	public Vector3[] controlPoints{
 		get{
@@ -31,6 +43,15 @@ public abstract class SplineCurve {
 	public float totalTime{
 		get{
 			return mTime[mTime.Length-1];
+		}
+	}
+	
+	public float totalLength{
+		get{
+			if (valueToLengthMapping==null){
+				InitValueToLengthMapping();
+			}
+			return valueToLengthMapping[valueToLengthMapping.Length-1].archLength;
 		}
 	}
 	
@@ -58,6 +79,57 @@ public abstract class SplineCurve {
 		return renderPoints.ToArray();
 	}
 	
+	public Vector3 GetPositionByLength(float length){
+		float time = GetTimeByLength(length);
+		return GetPosition(time);
+	}
+	
+	public float GetTimeByLength(float length){
+		if (valueToLengthMapping==null){
+			InitValueToLengthMapping();
+		}
+		float time = 0;
+		if (length>0){
+			if (length>=valueToLengthMapping[valueToLengthMapping.Length-1].archLength){
+				time = this.time[this.time.Length-1];
+			} else {
+				// find the segment where time is between
+				int segment = 0;
+				// this can be improved by using binary search
+				for (;valueToLengthMapping[segment+1].archLength<length;segment++){
+					// do nothing
+				}
+				float fraction = (length-valueToLengthMapping[segment].archLength)/(valueToLengthMapping[segment+1].archLength-valueToLengthMapping[segment].archLength);
+				time = Mathf.Lerp(valueToLengthMapping[segment].parameterValue,valueToLengthMapping[segment+1].parameterValue,fraction);
+			}
+		}
+		return time;
+	}
+	
+	public float GetLengthAtTime(float time){
+		if (valueToLengthMapping==null){
+			InitValueToLengthMapping();
+		}
+		
+		float length = 0;
+		if (time>this.time[0]){
+			if (time>=this.time[this.time.Length-1]){
+				time = valueToLengthMapping[valueToLengthMapping.Length-1].archLength;
+			} else {
+				// find the segment where time is between
+				int segment = 0;
+				// this can be improved by using binary search
+				for (;valueToLengthMapping[segment+1].archLength<length;segment++){
+					// do nothing
+				}
+				float fraction = (length-valueToLengthMapping[segment].archLength)/(valueToLengthMapping[segment+1].archLength-valueToLengthMapping[segment].archLength);
+				time = Mathf.Lerp(valueToLengthMapping[segment].parameterValue,valueToLengthMapping[segment+1].parameterValue,fraction);
+			}
+		}
+		
+		return -1;
+	}
+	
 	public abstract Vector3 GetPosition(float f);
 	
 	/// <summary>
@@ -71,7 +143,8 @@ public abstract class SplineCurve {
 	/// </param>
 	public abstract Vector3 GetVelocity(float f);
 	
-	protected void calculateSegmentLength(){
+	/*
+	 protected void calculateSegmentLength(){
 		renderPoints.Clear();
 		mTime[0] = 0;
 		mTime[mTime.Length-1] = int.MaxValue;
@@ -86,6 +159,80 @@ public abstract class SplineCurve {
 			mTime[i+1] = mTime[i]+calculatedLength;
 		}
 	}
+	*/
+	public void InitValueToLengthMapping(){
+		// assertion check
+		for (int i=1;i<mTime.Length;i++){
+			if (mTime[i-1] >= mTime[i]){
+				throw new Exception("Non increasing time parameter");
+			}
+		}
+		
+		float length = 0;
+		List<ParameterValueToArcLength> res = new List<ParameterValueToArcLength>();
+		res.Add(new ParameterValueToArcLength(mTime[0],length));
+		for (int i=0;i<mTime.Length-1;i++){
+			// compute length
+			length = SegmentArcLength(mTime[i], mTime[i+1],length,0, MAX_RECURSION_DEPTH,res);
+		}
+		valueToLengthMapping = res.ToArray();
+	}
+	
+	public string DebugValueToLength(){
+		string res = "\nValueToLength map:\n";
+		if (valueToLengthMapping==null){
+			InitValueToLengthMapping();
+		}
+		foreach (ParameterValueToArcLength p in valueToLengthMapping){
+			res += p.parameterValue+" = "+p.archLength+"\n";		
+		} 
+		return res;
+	}
+	
+	/// <summary>
+	/// Segments the length of the arc.
+	/// The calculation uses midpoint subdivision (with an extra check to avoid false positive)
+	/// </summary>
+	/// <param name='i'>
+	/// I. Segment index
+	/// </param>
+	/// <param name='u1'>
+	/// U1. normalized (must be between mTime[i] and u2)
+	/// </param>
+	/// <param name='u2'>
+	/// U2. normalized (must be between u1 and mTime[i+1])
+	/// </param>
+	private float SegmentArcLength(float u1, float u2, float initLength, float epsilon, int max, List<ParameterValueToArcLength> res){
+		Vector3 p1 = GetPosition(u1);
+		Vector3 p2 = GetPosition(u2);
+		Vector3 p1p2 = p2-p1;
+		float p1p2Length =p1p2.magnitude;
+		// make epsilon a fragment of segment length
+		if (epsilon==0){
+			epsilon = p1p2Length*lengthPrecision;
+		}
+		if (max==0){
+			float totalLength = initLength+p1p2Length;
+			res.Add(new ParameterValueToArcLength(u2,totalLength));
+			return totalLength;
+		}
+		
+		float half = (u2-u1)*0.5f;
+		Vector3 midPoint = GetPosition(u1+half);
+		
+		float quarter = half * 0.5f;
+		Vector3 quarterPoint = GetPosition(u1+quarter);
+		
+		if (IsStraight(p1,midPoint,p2,epsilon) && IsStraight(p1,quarterPoint,midPoint,epsilon)){
+			float totalLength = initLength+p1p2Length;
+			res.Add(new ParameterValueToArcLength(u2,totalLength));
+			return totalLength;	  
+		}
+		max --;
+		
+		initLength = SegmentArcLength(u1, u1+half,initLength, epsilon,max,res); 
+		return SegmentArcLength(u1+half, u2,initLength,epsilon, max,res);
+	}
 	
 	/// <summary>
 	/// Calculates the render points.
@@ -96,6 +243,8 @@ public abstract class SplineCurve {
 		Vector3 p2 = GetPosition(u2);
 		Vector3 p1p2 = p2-p1;
 		float p1p2Length =p1p2.magnitude;
+		
+		// make epsilon a fragment of segment length
 		if (epsilon==0){
 			epsilon = p1p2Length*lengthPrecision;
 		}
@@ -120,44 +269,7 @@ public abstract class SplineCurve {
 		calcRenderPoints(u1+half, u2, epsilon, max-1);
 	}
 	
-	/// <summary>
-	/// Segments the length of the arc.
-	/// The calculation uses midpoint subdivision (with an extra check to avoid false positive)
-	/// </summary>
-	/// <param name='i'>
-	/// I. Segment index
-	/// </param>
-	/// <param name='u1'>
-	/// U1. normalized (must be between mTime[i] and u2)
-	/// </param>
-	/// <param name='u2'>
-	/// U2. normalized (must be between u1 and mTime[i+1])
-	/// </param>
-	private float SegmentArcLength(float u1, float u2, float epsilon, int max){
-		Vector3 p1 = GetPosition(u1);
-		Vector3 p2 = GetPosition(u2);
-		Vector3 p1p2 = p2-p1;
-		float p1p2Length =p1p2.magnitude;
-		if (epsilon==0){
-			epsilon = p1p2Length*lengthPrecision;
-		}
-		if (max==0){
-			return p1p2Length;
-		}
-		
-		float half = (u2-u1)*0.5f;
-		Vector3 midPoint = GetPosition(u1+half);
-		
-		float quarter = half * 0.5f;
-		Vector3 quarterPoint = GetPosition(u1+quarter);
-		
-		if (IsStraight(p1,midPoint,p2,epsilon) && IsStraight(p1,quarterPoint,midPoint,epsilon)){
-			return p1p2Length;	  
-		}
-		max --;
-		
-		return SegmentArcLength(u1, u1+half,epsilon,max) + SegmentArcLength(u1+half, u2,epsilon, max);
-	}
+	
 	
 	/// <summary>
 	/// Note that this method can be optimized if it is inlined in the code.
@@ -169,6 +281,6 @@ public abstract class SplineCurve {
 		float p1p3Length = (p1-p3).magnitude;
 		float p1p2Length = (p1-p2).magnitude;
 		float p2p3Length = (p2-p3).magnitude;
-		return Mathf.Abs(p1p3Length-p1p2Length-p2p3Length)<=epsilon;
+		return p1p2Length+p2p3Length-p1p3Length<=epsilon;
 	}
 }

@@ -12,7 +12,7 @@ public class HermiteSplineTest : UUnitTestCase {
 		};
 		HermiteSplineCurve hermite = new HermiteSplineCurve();
 		hermite.InitNatural(p1);
-		float totalLength = hermite.totalTime;
+		float totalLength = hermite.totalLength;
 		
 		float linearLength = 0;
 		for (int i=0;i<p1.Length-1;i++){

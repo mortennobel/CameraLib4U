@@ -30,7 +30,7 @@ public class ChaseCamera : AbstractCamera {
     /// Physics coefficient which approximates internal friction of the spring.
     /// Sufficient damping will prevent the spring from oscillating infinitely.
     public float movementSpringDamping = 12.0f;
-	private Vector3 velocity = Vector3.zero;
+	private Vector3 movementVelocity = Vector3.zero;
 	
 	// horizontal spring damping
 	public bool lookHorizontalSpringDamped = true;
@@ -86,7 +86,7 @@ public class ChaseCamera : AbstractCamera {
 		base.InitCamera();
 		// set the camera position to desiered position and velocity to zero
 		transform.position = GetCameraDesiredPosition(0,0);
-		velocity = Vector3.zero;
+		movementVelocity = Vector3.zero;
 	}
 	
 	/// <summary>
@@ -95,7 +95,7 @@ public class ChaseCamera : AbstractCamera {
 	public override void UpdateCameraPosition (float lookHorizontal, float lookVertical) {
 		desiredPosition = GetCameraDesiredPosition(lookHorizontal, lookVertical);
 		if (movementSpringDampingEnabled){
-			transform.position = Damping.SpringDamping(transform.position,desiredPosition,ref velocity,movementSpringStiffness,movementSpringDamping);
+			transform.position = Damping.SpringDamping(transform.position,desiredPosition,ref movementVelocity,movementSpringStiffness,movementSpringDamping);
 		} else {
 			transform.position = desiredPosition;
 		}
@@ -146,16 +146,21 @@ public class ChaseCamera : AbstractCamera {
 			RaycastHit[] hitInfo = Physics.SphereCastAll(target.position,virtualCameraCollisionRadius,direction, distance);  
 			
 			float newCameraDistance = distance;
+			bool partialOcclusion = !raycastResult[0] || !raycastResult[1]|| !raycastResult[2];
 			// allow partially occluded object if hit distance is less than 25% of pref. distance
 			if (hitInfo.Length>0){
 				for (int i=0;i<hitInfo.Length;i++){
-					if (!(hitInfo[i].distance<distance*0.25f && (!raycastResult[0] || !raycastResult[1]|| !raycastResult[2]))){
-						newCameraDistance = hitInfo[i].distance;		
+					bool partiallyOcclusionDistance = hitInfo[i].distance<distance*0.25f;
+					if (!partiallyOcclusionDistance || !partialOcclusion){
+						// todo 
+						newCameraDistance = hitInfo[i].distance;
+						break;
 					}
 				}
-			} 
+			}
 			
-			if (newCameraDistance<idealSpherical.x){
+			if (newCameraDistance<idealSpherical.x || 
+				newCameraDistance-idealSpherical.x<=Mathf.Epsilon){ // don't damp if target is reached
 				idealSpherical.x = newCameraDistance;
 				vccMoveBackVelocity = 0;
 			} else {

@@ -66,29 +66,7 @@ public class SplineLibGUI : Editor {
 			splineComponent.DoUpdateSpline();
 		}
 		EditorGUILayout.EndHorizontal ();
-		if (splineComponent.splineType==SplineComponent.SplineType.KochanekBartel){
-			float bias = splineComponent.bias;
-			float tension = splineComponent.tension;
-			float continuity = splineComponent.continuity;
-			
-			EditorGUILayout.BeginHorizontal ();
-		    splineComponent.bias = EditorGUILayout.FloatField("Bias",splineComponent.bias);
-		    EditorGUILayout.EndHorizontal ();
-			
-			EditorGUILayout.BeginHorizontal ();
-		    splineComponent.tension = EditorGUILayout.FloatField("Tension",splineComponent.tension);
-		    EditorGUILayout.EndHorizontal ();
-			
-			EditorGUILayout.BeginHorizontal ();
-		    splineComponent.continuity = EditorGUILayout.FloatField("Continuity",splineComponent.continuity);
-		    EditorGUILayout.EndHorizontal ();
-			if (bias != splineComponent.bias || 
-				tension != splineComponent.tension || 
-				continuity != splineComponent.continuity){
-				splineComponent.DoUpdateSpline();
-			}
-		}
-			
+					
 		EditorGUILayout.BeginHorizontal();
     	EditorGUILayout.LabelField("Spline length",splineComponent.GetSplineObject().totalTime.ToString());
     	EditorGUILayout.EndHorizontal();

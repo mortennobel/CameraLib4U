@@ -28,6 +28,7 @@ public class PathBoundCamera : AbstractCamera {
 	public float maxDistanceToJumpCut =4;
 	private float currentPositionOnPath = 0;
 	 
+	/// The minimum time between distancebased jumpcut.
 	public float minTimeBetweenDistancebasedJumpcut =3;
 	private float distanceBasedJumpcutTimer = 0;
 	

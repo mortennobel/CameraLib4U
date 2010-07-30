@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class SplineComponent : MonoBehaviour {
 	
-	public enum SplineType { LinearSpline,BezierSpline,BezierSmoothSpline, CatmullRom, KochanekBartel };
+	public enum SplineType { LinearSpline,BezierSpline,BezierSmoothSpline, CatmullRom };
 	
 	public SplineType splineType = SplineType.LinearSpline;
 	public SplineCurve spline;
@@ -15,10 +15,6 @@ public class SplineComponent : MonoBehaviour {
 	
 	public float sphereRadius = 0.1f;
 	public float lengthPrecision =0.001f;
-	
-	public float bias = 0f;
-	public float tension = 0f;
-	public float continuity = 0f;
 	
 	private bool updated = false;
 
@@ -54,7 +50,7 @@ public class SplineComponent : MonoBehaviour {
 		List<Vector3> controlPoints = new List<Vector3>();
 		List<Vector3> tangents = new List<Vector3>();
 		List<float> time = new List<float>();
-		float lastTime = -1f;
+		float lastTime = 0;
 		for (int i=0;i<transform.childCount;i++){
 			ControlPointComponent controlPointComp = transform.GetChild(i).gameObject.GetComponent<ControlPointComponent>();
 			if (controlPointComp!=null){
@@ -62,7 +58,7 @@ public class SplineComponent : MonoBehaviour {
 				tangents.Add(controlPointComp.tangent);
 				// if illegal time detected, then autoadjust
 				if (lastTime>=controlPointComp.time){
-					controlPointComp.time += lastTime; 
+					controlPointComp.time += lastTime+1; 
 				}
 				lastTime = controlPointComp.time;
 				time.Add(controlPointComp.time);
@@ -74,24 +70,16 @@ public class SplineComponent : MonoBehaviour {
 			LinearSplineCurve lSpline = new LinearSplineCurve();
 			spline = lSpline;
 			spline.lengthPrecision =lengthPrecision;
-			lSpline.Init(controlPoints.ToArray());
+			lSpline.Init(controlPoints.ToArray(), time.ToArray());
 			}
 			break;
 		case SplineType.CatmullRom:{
 			HermiteSplineCurve hSpline = new HermiteSplineCurve();
 			spline = hSpline;
 			spline.lengthPrecision =lengthPrecision;
-			hSpline.InitKochanekBartel(controlPoints.ToArray(),0f,0f,0f);
+			hSpline.InitCatmullRom(controlPoints.ToArray());
 			}
 			break;
-		case SplineType.KochanekBartel:
-		{
-			HermiteSplineCurve hSpline = new HermiteSplineCurve();
-			spline = hSpline;
-			spline.lengthPrecision =lengthPrecision;
-			hSpline.InitKochanekBartel(controlPoints.ToArray(),bias,tension,continuity);				
-		}
-		break;
 		case SplineType.BezierSpline:
 		case SplineType.BezierSmoothSpline:
 			BezierSplineCurve bSpline = new BezierSplineCurve();
@@ -155,7 +143,6 @@ public class SplineComponent : MonoBehaviour {
 		switch (splineType){
 			case SplineType.LinearSpline:
 			case SplineType.CatmullRom:
-			case SplineType.KochanekBartel:
 			return 2;
 		case SplineType.BezierSpline:
 			return 4;

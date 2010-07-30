@@ -14,14 +14,25 @@ public class BezierSplineCurve : SplineCurve {
 			mApproximatingControlPoints=value;
 		}
 	}
-		
+	
 	public void Init(Vector3[] controlPoints, Vector3[] approximatingControlPoints){
+		float[] time = new float[controlPoints.Length];
+		for (int i=0;i<time.Length;i++){
+			time[i] = i;
+		}
+		Init(controlPoints, approximatingControlPoints, time);
+	}
+	
+	public void Init(Vector3[] controlPoints, Vector3[] approximatingControlPoints, float[] time){
 		if (Debug.isDebugBuild) {
 			if (controlPoints.Length<2){
 				throw new Exception("Min 2 controlpoints must be defined");
 			}
-			if (approximatingControlPoints.Length!=controlPoints.Length/2+1){
+			if (approximatingControlPoints.Length!=(controlPoints.Length-1)*2){
 				throw new Exception("Invalid number of controlPoints compared to number of approximatingControlPoints");
+			}
+			if (time.Length!=controlPoints.Length){
+				throw new Exception("Time length should equal controlpoints length");
 			}
 		}
 		this.controlPoints = new Vector3[controlPoints.Length];
@@ -30,7 +41,14 @@ public class BezierSplineCurve : SplineCurve {
 		Array.Copy(controlPoints, this.controlPoints, controlPoints.Length);
 		Array.Copy(approximatingControlPoints, this.approximatingControlPoints, approximatingControlPoints.Length);
 		Array.Copy(time, this.time, time.Length);
-		calculateSegmentLength();
+	}
+	
+	public void InitSmoothTangents(Vector3[] controlPoints){
+		float[] time = new float[controlPoints.Length];
+		for (int i=0;i<time.Length;i++){
+			time[i] = i;
+		}
+		InitSmoothTangents(controlPoints, time);
 	}
 	
 	/// <summary>
@@ -38,16 +56,16 @@ public class BezierSplineCurve : SplineCurve {
 	/// controlpoints must have the structure (note the first segment is 4 nodes - the rest is only three
 	/// &lt;cp, acp, acp, cp, acp, cp, ... cp, acp, cp&gt;
 	/// </summary>
-	/// <param name='controlPoints'>
-	/// Control points.
-	/// </param>
-	/// <param name='time'>
-	/// Time.
-	/// </param>
-	public void InitSmoothTangents(Vector3[] controlPoints){
+	public void InitSmoothTangents(Vector3[] controlPoints, float[] time){
+		if (Debug.isDebugBuild) {
+			if (time.Length!=controlPoints.Length){
+				throw new Exception("Time length should equal controlpoints length");
+			}
+		}
 		int usableLength = controlPoints.Length-(controlPoints.Length%2);
 		this.controlPoints = new Vector3[(usableLength)/2];
 		this.time = new float[this.controlPoints.Length];
+		Array.Copy(time, this.time, time.Length);
 		this.approximatingControlPoints = new Vector3[(this.controlPoints.Length-1)*2];
 		
 		this.controlPoints[0] = controlPoints[0];
@@ -63,7 +81,15 @@ public class BezierSplineCurve : SplineCurve {
 			}
 			this.approximatingControlPoints[aIndex+1] = controlPoints[i-1];
 		}
-		calculateSegmentLength();
+	}
+	
+	public void Init(Vector3[] controlPoints){
+		int usableLength = controlPoints.Length-((controlPoints.Length-1)%3);
+		float[] time = new float[(usableLength)/3+1];
+		for (int i=0;i<time.Length;i++){
+			time[i] = i;
+		}
+		Init(controlPoints, time);
 	}
 	
 	/// <summary>
@@ -81,7 +107,7 @@ public class BezierSplineCurve : SplineCurve {
 	/// <exception cref='Exception'>
 	/// Represents errors that occur during application execution.
 	/// </exception>
-	public void Init(Vector3[] controlPoints){
+	public void Init(Vector3[] controlPoints, float[] time){
 		if (Debug.isDebugBuild) {
 			if (controlPoints.Length<4){
 				throw new Exception("Min length is 4");
@@ -91,6 +117,7 @@ public class BezierSplineCurve : SplineCurve {
 		this.controlPoints = new Vector3[(usableLength)/3+1];
 		this.approximatingControlPoints = new Vector3[(this.controlPoints.Length-1)*2];
 		this.time = new float[this.controlPoints.Length];
+		Array.Copy(time, this.time, time.Length);
 		this.controlPoints[0] = controlPoints[0];
 		
 		for (int i=1;i<usableLength;i=i+3){
@@ -101,7 +128,6 @@ public class BezierSplineCurve : SplineCurve {
 			approximatingControlPoints[approxIndex+1] = controlPoints[i+1];
 			this.controlPoints[index] = controlPoints[i+2];
 		}
-		calculateSegmentLength();
 	}
 	
 	public override Vector3 GetPosition(float time){
