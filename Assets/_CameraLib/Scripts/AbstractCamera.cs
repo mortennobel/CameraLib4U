@@ -20,6 +20,8 @@ public abstract class AbstractCamera : MonoBehaviour{
 	
 	private bool targetRenderingEnabled;
 	
+	public Quaternion lookAtRotationOffset = Quaternion.Euler(-15f,0,0);
+	
 	/// <summary>
 	/// Updates the camera position - by calling the GetCameraDesiredPosition() and smooth the movement.
 	/// </summary>
@@ -76,11 +78,11 @@ public abstract class AbstractCamera : MonoBehaviour{
 	public virtual void UpdateLookOrientation(){
 		if (smoothLookAtEnabled) {
 			// Look at and dampen the rotation
-			Quaternion rotation = Quaternion.LookRotation(target.position - transform.position);
+			Quaternion rotation = Quaternion.LookRotation(target.position - transform.position)*lookAtRotationOffset;
 			transform.rotation =  Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * smoothLookAtDamping);
 		} else {
 			// Just lookat
-		    transform.rotation =  Quaternion.LookRotation(target.position - transform.position);
+		    transform.rotation =  Quaternion.LookRotation(target.position - transform.position)*lookAtRotationOffset;
 		}
 	}
 }

@@ -116,7 +116,7 @@ public class ChaseCameraGUI : Editor {
 			}
 		}
 		
-		lookAtDamping = EditorGUILayout.Foldout(lookAtDamping, "LookAt damping");
+		lookAtDamping = EditorGUILayout.Foldout(lookAtDamping, "LookAt");
 		if (lookAtDamping){
 			ChaseCameraGUI.EditorGUISmoothLookAt(chaseCamera);
 		}
@@ -162,12 +162,17 @@ public class ChaseCameraGUI : Editor {
 	public static void EditorGUISmoothLookAt(AbstractCamera camera){
 		EditorGUILayout.BeginHorizontal ();
     	camera.smoothLookAtEnabled = 
-			EditorGUILayout.Toggle("Enabled",camera.smoothLookAtEnabled);
+			EditorGUILayout.Toggle("Rotation damping Enabled",camera.smoothLookAtEnabled);
     	EditorGUILayout.EndHorizontal ();
-		
+		if (camera.smoothLookAtEnabled){
+			EditorGUILayout.BeginHorizontal ();
+	    	camera.smoothLookAtDamping = 
+				EditorGUILayout.FloatField("Damping",camera.smoothLookAtDamping);
+	    	EditorGUILayout.EndHorizontal ();
+		}
 		EditorGUILayout.BeginHorizontal ();
-    	camera.smoothLookAtDamping = 
-			EditorGUILayout.FloatField("Damping",camera.smoothLookAtDamping);
+    	camera.lookAtRotationOffset = 
+			Quaternion.Euler(EditorGUILayout.Vector3Field("Rotation offset",camera.lookAtRotationOffset.eulerAngles));
     	EditorGUILayout.EndHorizontal ();
 	}
 }

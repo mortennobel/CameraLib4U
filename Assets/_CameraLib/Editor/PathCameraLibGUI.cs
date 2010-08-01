@@ -58,7 +58,7 @@ public class PathCameraLibGUI : Editor {
 				                                                  ref pathCamera.movementSpringDamping);
 			}
 		}
-		lookAtDamping =EditorGUILayout.Foldout(lookAtDamping, "LookAt damping");
+		lookAtDamping =EditorGUILayout.Foldout(lookAtDamping, "LookAt");
 		if (lookAtDamping){
 			ChaseCameraGUI.EditorGUISmoothLookAt(pathCamera);
 		}
