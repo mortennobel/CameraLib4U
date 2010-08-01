@@ -46,14 +46,16 @@ public class ChaseCameraGUI : Editor {
     	EditorGUILayout.EndHorizontal ();
 		
 		EditorGUILayout.BeginHorizontal ();
-    	EditorGUILayout.PrefixLabel ("Camera height");
-    	chaseCamera.cameraHeight = EditorGUILayout.FloatField(chaseCamera.cameraHeight);
+    	
+		EditorGUILayout.PrefixLabel ("Camera pitch");
+    	chaseCamera.cameraPitch = EditorGUILayout.Slider(chaseCamera.cameraPitch*Mathf.Rad2Deg,0,90)*Mathf.Deg2Rad;
     	EditorGUILayout.EndHorizontal ();
 		
 		EditorGUILayout.BeginHorizontal ();
-		string cameraPitch = ""+chaseCamera.GetCameraPitch()+'\u00B0';
-		EditorGUILayout.LabelField("Camera pitch", cameraPitch);
+		string cameraHeight = ""+chaseCamera.GetCameraHeight();
+		EditorGUILayout.LabelField("Camera height", cameraHeight);
     	EditorGUILayout.EndHorizontal ();
+		
 		EditorGUILayout.Separator();
 		EditorGUILayout.BeginHorizontal ();
         chaseCamera.virtualCameraCollisionTest = 

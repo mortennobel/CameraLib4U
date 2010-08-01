@@ -4,7 +4,8 @@ using System.Collections;
 [AddComponentMenu("CameraLib/Chase Camera")]
 [RequireComponent (typeof (Camera))]
 public class ChaseCamera : AbstractCamera {
-	public float cameraHeight = 2;
+	// public float cameraHeight = 2;
+	public float cameraPitch = 0;
 	public float distance = 3;
 	
 	public enum ChaseCameraType { Loose, LooseAllowMovementUnderCamra,StayBehind };
@@ -13,7 +14,6 @@ public class ChaseCamera : AbstractCamera {
 	
 	private Vector3 lastCameraTargetPosition = Vector3.zero;
 	public Vector3 idealSpherical = new Vector3();
-	private float initialPitch;
 	
 	private Vector3 desiredPosition = Vector3.zero;
 	
@@ -59,30 +59,31 @@ public class ChaseCamera : AbstractCamera {
 	private Vector3[] raycastOffset = new Vector3[3];
 	private int raycastCounter = 0;
 	
+	private bool runOnce = true;
+	
 	// Use this for initialization
 	void Start () {
-		lastCameraTargetPosition = transform.position;
-		UpdateIdealSpherical();
-		raycastOffset[0] = Vector3.up*(targetHeight*0.5f);
-		raycastOffset[1] = Vector3.up*(targetHeight*0.5f);
-		raycastOffset[2] = Vector3.zero;
-		
+		InitCamera();
 	} 
 	
 	private void UpdateIdealSpherical(){
 		idealSpherical.x = distance;
-		idealSpherical.z = Mathf.Asin(cameraHeight/distance);
-		initialPitch = idealSpherical.z;
+		idealSpherical.z = cameraPitch;// Mathf.Asin(cameraHeight/distance);
 	}
 	
-	/// <summary>
-	/// Returns the Pitch of the camera in degrees (rotation around the x axis) 
-	/// </summary>
-	public float GetCameraPitch(){
-		return -Mathf.Asin(cameraHeight/distance)*Mathf.Rad2Deg;
+	public float GetCameraHeight(){
+		return distance*Mathf.Sin(cameraPitch);
 	}
 	
 	public override void InitCamera(){
+		if (runOnce == true){
+			runOnce = false;
+			lastCameraTargetPosition = transform.position;
+			UpdateIdealSpherical();
+			raycastOffset[0] = Vector3.up*(targetHeight*0.5f);
+			raycastOffset[1] = Vector3.up*(targetHeight*0.5f);
+			raycastOffset[2] = Vector3.zero;
+		}
 		base.InitCamera();
 		// set the camera position to desiered position and velocity to zero
 		transform.position = GetCameraDesiredPosition(0,0);
@@ -121,7 +122,7 @@ public class ChaseCamera : AbstractCamera {
 				lookVerticalActual = Damping.SpringDamping(lookVerticalActual,lookVertical, ref lookVerticalVelocity,
 					lookVerticalSpringStiffness,lookVerticalSpringDamping);
 				
-				idealSpherical.z = Mathf.Clamp(initialPitch+lookVerticalActual*Mathf.PI, -Mathf.PI*0.45f, Mathf.PI*0.45f);
+				idealSpherical.z = Mathf.Clamp(cameraPitch+lookVerticalActual*Mathf.PI, -Mathf.PI*0.45f, Mathf.PI*0.45f);
 				
 			}
 		} else {
@@ -134,7 +135,7 @@ public class ChaseCamera : AbstractCamera {
 			idealSpherical.y = Mathf.Atan2(transform.position.z-target.position.z,
 				transform.position.x-target.position.x);
 		}
-		Vector3 direction = Vector3Ext.SphericalToCartesian(idealSpherical);;
+		Vector3 direction = Vector3Ext.SphericalToCartesian(idealSpherical);
 		lastCameraTargetPosition = target.position+direction;
 		if (virtualCameraCollisionTest){
 			raycastCounter++;
@@ -152,19 +153,25 @@ public class ChaseCamera : AbstractCamera {
 				for (int i=0;i<hitInfo.Length;i++){
 					bool partiallyOcclusionDistance = hitInfo[i].distance<distance*0.25f;
 					if (!partiallyOcclusionDistance || !partialOcclusion){
-						// todo 
 						newCameraDistance = hitInfo[i].distance;
 						break;
 					}
 				}
 			}
 			
+			float currentDistance = idealSpherical.x;
 			if (newCameraDistance<idealSpherical.x || 
 				newCameraDistance-idealSpherical.x<=Mathf.Epsilon){ // don't damp if target is reached
 				idealSpherical.x = newCameraDistance;
 				vccMoveBackVelocity = 0;
 			} else {
 				idealSpherical.x = Damping.SpringDamping(idealSpherical.x, newCameraDistance,ref vccMoveBackVelocity, vccMoveBackSpringStiffness,vccMoveBackSpringDamping);
+			}
+			
+			// if distance was updated, then recalculate position
+			if (currentDistance != idealSpherical.x){
+				direction = Vector3Ext.SphericalToCartesian(idealSpherical);
+				lastCameraTargetPosition = target.position+direction;
 			}
 		}
 		return lastCameraTargetPosition;
