@@ -4,14 +4,14 @@ using System;
 
 public class BezierSplineCurve : SplineCurve {
 	
-	private Vector3[] mApproximatingControlPoints;
+	private Vector3[] approximatingControlPoints;
 	
-	public Vector3[] approximatingControlPoints{
+	public Vector3[] ApproximatingControlPoints{
 		get{
-			return mApproximatingControlPoints;
+			return approximatingControlPoints;
 		}
 		protected set{
-			mApproximatingControlPoints=value;
+			approximatingControlPoints=value;
 		}
 	}
 	

@@ -51,6 +51,10 @@ public class PathBoundCamera : AbstractCamera {
 	void Start () {
 		this.cameraSplineObject = cameraSpline.GetSplineObject();
 		InitCamera();	
+		
+		if (maxDistanceToJumpCut<=maxDistanceToTarget){
+			Debug.LogWarning("maxDistanceToJumpCut should be larger than maxDistanceToTarget");
+		}
 	}
 	
 	/// <summary>
@@ -65,6 +69,11 @@ public class PathBoundCamera : AbstractCamera {
 	/// Set the camera on on the controlpoint closest to the player
 	/// </summary>
 	public override void InitCamera(){
+		if (cameraSplineObject==null){
+			this.cameraSplineObject = cameraSpline.GetSplineObject();
+			Debug.LogWarning("cameraSplineObject is null");
+			return;
+		}
 		JumpCutToClosestControlPoint();
 		base.InitCamera();
 	}
@@ -73,6 +82,7 @@ public class PathBoundCamera : AbstractCamera {
 	/// Search for the control point closest to the player and jump cut to that position 
 	/// </summary>
 	private void JumpCutToClosestControlPoint(){
+		
 		Vector3[] controlpoints = cameraSplineObject.controlPoints;
 		float minDistance = float.MaxValue;
 		
