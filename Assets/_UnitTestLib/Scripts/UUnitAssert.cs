@@ -93,8 +93,6 @@ public class UUnitAssert  {
 	}
 	
 	private static void Error(object expected, object actual, string msg){
-		Exception e = new Exception();
-		String errMsg = "UUnitAssertException: Expected: "+expected+" actual "+actual+" msg: "+msg;
 		throw new UUnitAssertException(expected, actual, msg);
 	}
 }
