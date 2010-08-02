@@ -29,7 +29,8 @@ public class PathBoundCamera : AbstractCamera {
 	private float currentPositionOnPath = 0;
 	 
 	/// The minimum time between distancebased jumpcut.
-	public float minTimeBetweenDistancebasedJumpcut =3;
+	public float minTimeBetweenDistancebasedJumpcut = 1;
+	// only increased when maxDistanceToJumpCut is exceeded
 	private float distanceBasedJumpcutTimer = 0;
 	
 	public bool movementSpringDampingEnabled = true; 
@@ -115,11 +116,14 @@ public class PathBoundCamera : AbstractCamera {
 			return cameraSplineObject.GetPositionByLength(currentPositionOnPath);
 		} 	
 		
-		if (distance.sqrMagnitude > maxDistanceToJumpCut*maxDistanceToJumpCut && 
-		    distanceBasedJumpcutTimer > minTimeBetweenDistancebasedJumpcut){
-			// jump cut
-			JumpCutToClosestControlPoint();
-			return transform.position;
+		if (distance.sqrMagnitude > maxDistanceToJumpCut*maxDistanceToJumpCut){ 
+		    if (distanceBasedJumpcutTimer > minTimeBetweenDistancebasedJumpcut){
+				// jump cut
+				JumpCutToClosestControlPoint();
+				return transform.position;
+			}
+		} else {
+			distanceBasedJumpcutTimer = 0;
 		}
 		
 		// determine search direction

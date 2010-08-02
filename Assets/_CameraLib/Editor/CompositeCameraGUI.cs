@@ -12,7 +12,6 @@ public class CompositeCameraGUI : Editor {
 	public override void OnInspectorGUI ()
 	{
 		CompositeCamera compositeCamera;
-
 		compositeCamera = target as CompositeCamera;
 
 		if (compositeCamera == null)
