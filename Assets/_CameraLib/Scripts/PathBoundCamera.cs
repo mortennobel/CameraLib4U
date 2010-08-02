@@ -49,12 +49,7 @@ public class PathBoundCamera : AbstractCamera {
 	
 	// Use this for initialization
 	void Start () {
-		this.cameraSplineObject = cameraSpline.GetSplineObject();
 		InitCamera();	
-		
-		if (maxDistanceToJumpCut<=maxDistanceToTarget){
-			Debug.LogWarning("maxDistanceToJumpCut should be larger than maxDistanceToTarget");
-		}
 	}
 	
 	/// <summary>
@@ -71,11 +66,12 @@ public class PathBoundCamera : AbstractCamera {
 	public override void InitCamera(){
 		if (cameraSplineObject==null){
 			this.cameraSplineObject = cameraSpline.GetSplineObject();
-			Debug.LogWarning("cameraSplineObject is null");
-			return;
+		}
+		if (maxDistanceToJumpCut<=maxDistanceToTarget){
+			Debug.LogWarning("maxDistanceToJumpCut should be larger than maxDistanceToTarget");
 		}
 		JumpCutToClosestControlPoint();
-		base.InitCamera();
+	 	base.InitCamera();
 	}
 	
 	/// <summary>

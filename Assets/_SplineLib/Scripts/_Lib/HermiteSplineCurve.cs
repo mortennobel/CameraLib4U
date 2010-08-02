@@ -6,6 +6,18 @@ public class HermiteSplineCurve : SplineCurve {
 	private Vector3[] tangent0Vectors; // first tangent at a line segment
 	private Vector3[] tangent1Vectors; // last tangent at a line segment
 	
+	public Vector3[] Tangent0Vectors{
+		get{
+			return tangent0Vectors;
+		}
+	}
+	
+	public Vector3[] Tangent1Vectors{
+		get{
+			return tangent1Vectors;
+		}
+	}
+	
 	public void Init(Vector3[] controlPoints, Vector3[] tangent0Vectors, Vector3[] tangent1Vectors, float[] time){
 		if (Debug.isDebugBuild) {
 			if (controlPoints.Length-1!=tangent1Vectors.Length){
@@ -90,26 +102,24 @@ public class HermiteSplineCurve : SplineCurve {
 	}
 	
 	/// <summary>
-	/// Inits the kochanek bartel using 'phantom' endpoints.
+	/// Inits the catmull rom using 'phantom' endpoints.
 	/// </summary>
 	public void InitCatmullRom(Vector3[] controlPoints, float[] time){
 		int n = controlPoints.Length;
-		Vector3 firstPhantomPoint = controlPoints[1]+(controlPoints[1]-controlPoints[2]);
-		Vector3 lastPhantomPoint = controlPoints[n-2]+(controlPoints[n-2]-controlPoints[n-3]);
+		Vector3 firstPhantomPoint = controlPoints[1]-(controlPoints[1]-controlPoints[2]);
+		Vector3 lastPhantomPoint = controlPoints[n-2]-(controlPoints[n-2]-controlPoints[n-3]);
 		
 		Vector3 firstTangent = (firstPhantomPoint-controlPoints[0])*0.5f;
-		Vector3 lastTangent = (lastPhantomPoint-controlPoints[n-1])*0.5f;
+		Vector3 lastTangent = (-lastPhantomPoint+controlPoints[n-1])*0.5f;
 		
 		Vector3[] tangent1Vectors = new Vector3[controlPoints.Length-1];
 		Vector3[] tangent0Vectors = new Vector3[controlPoints.Length-1];
+		
 		for (int i=1;i<controlPoints.Length-1;i++){
 			Vector3 pm1 = controlPoints[i-1];
 			Vector3 pp1 = controlPoints[i+1]; 
 			
 			Vector3 tangent = (pp1-pm1)*0.5f;		
-			
-			float Ni = time[Math.Min(i+1,controlPoints.Length-1)]-time[i];
-			float Nim1 = time[i]-time[Math.Max(0,i-1)];
 			
 			tangent1Vectors[i-1] = tangent;
 			tangent0Vectors[i] = tangent;
@@ -225,11 +235,15 @@ public class HermiteSplineCurve : SplineCurve {
 		if (controlPoints.Length==1){
 			return Vector3.zero;
 		}
-		int i =GetSegmentIndex(time);
+		int i = GetSegmentIndex(time);
 		
 		float t0 = this.time[i];
 		float t1 = this.time[i+1];
 		float u = (time-t0)/(t1-t0);
+		
+		if (time==this.time[this.time.Length-1]){
+			return tangent1Vectors[i];
+		}
 		
 		// simplified matrix multiplication
 		Vector3 A = 2.0f*controlPoints[i]

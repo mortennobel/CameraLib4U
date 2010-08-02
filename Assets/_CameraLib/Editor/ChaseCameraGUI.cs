@@ -89,7 +89,7 @@ public class ChaseCameraGUI : Editor {
 			}
 		}
 		if (chaseCamera.cameraType==ChaseCamera.ChaseCameraType.StayBehind){
-			lookVertical = EditorGUILayout.Foldout(lookVertical, "Look horizontal damping");
+			lookVertical = EditorGUILayout.Foldout(lookVertical, "User look horizontal damping");
 			if (lookVertical){
 				EditorGUILayout.BeginHorizontal ();
 	        	chaseCamera.lookHorizontalSpringDamped = 
@@ -102,7 +102,7 @@ public class ChaseCameraGUI : Editor {
 				}
 			}
 			
-			lookHorizontal = EditorGUILayout.Foldout(lookHorizontal, "Look vertical damping");
+			lookHorizontal = EditorGUILayout.Foldout(lookHorizontal, "User look vertical damping");
 			if (lookHorizontal){
 				EditorGUILayout.BeginHorizontal ();
 	        	chaseCamera.lookVerticalSpringDamped = 

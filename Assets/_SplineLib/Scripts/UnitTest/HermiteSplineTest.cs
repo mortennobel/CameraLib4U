@@ -36,4 +36,49 @@ public class HermiteSplineTest : UUnitTestCase {
 			hermite.GetPosition(f);
 		}
 	}
+	
+	public void TestCatmullRomVelocities(){
+		Vector3[] p1 = {
+			new Vector3(0,0,0),
+			new Vector3(1,0,0),
+			new Vector3(2,0,0),
+			new Vector3(3,0,0),
+			
+		};
+		float[] fs = {
+			0,1,2,3
+		};
+		
+		HermiteSplineCurve hermite = new HermiteSplineCurve();
+		hermite.InitCatmullRom(p1,fs); 
+		
+		Vector3[] velocitySamples = {
+			hermite.GetVelocity(0.0f),
+			hermite.GetVelocity(0.5f),
+			hermite.GetVelocity(1.0f),
+			hermite.GetVelocity(1.5f),
+			hermite.GetVelocity(2.0f),
+			hermite.GetVelocity(3.0f),
+			
+		};
+		string tangentDebug = "Tangent 0 vectors:\n";
+		foreach (Vector3 v in hermite.Tangent0Vectors){
+			tangentDebug += v+",";
+		} 
+		tangentDebug += "\nTangent 1 vectors:\n";
+		foreach (Vector3 v in hermite.Tangent1Vectors){
+			tangentDebug += v+",";
+		} 
+		Debug.Log(tangentDebug);
+		
+		string velcityDebug = "Velocity:\n";
+		foreach (Vector3 v in velocitySamples){
+			velcityDebug += v+",";
+		}
+		Debug.Log(velcityDebug);
+		
+		for (int i=1;i<velocitySamples.Length;i++){
+			Assert.Equals(velocitySamples[i-1],velocitySamples[i], "Index "+i);
+		}
+	}
 }

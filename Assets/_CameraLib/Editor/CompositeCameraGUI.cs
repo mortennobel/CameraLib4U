@@ -7,6 +7,7 @@ using System;
 public class CompositeCameraGUI : Editor {
 	
 	private bool camerasFoldout = false;
+	private bool lookAtDamping = false;
 	
 	public override void OnInspectorGUI ()
 	{
@@ -44,5 +45,10 @@ public class CompositeCameraGUI : Editor {
 		EditorGUILayout.BeginHorizontal ();
 		compositeCamera.curve = EditorGUILayout.CurveField("Interpolation", compositeCamera.curve);
 		EditorGUILayout.EndHorizontal ();
+		
+		lookAtDamping =EditorGUILayout.Foldout(lookAtDamping, "LookAt");
+		if (lookAtDamping){
+			ChaseCameraGUI.EditorGUISmoothLookAt(compositeCamera);
+		}
 	}
 }

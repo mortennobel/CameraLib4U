@@ -95,6 +95,7 @@ public class CompositeCamera : AbstractCamera {
 		}
 	}
 	
+	/*
 	public override void UpdateLookOrientation(){
 		if (lastCamera != -1){
 			cameras[lastCamera].UpdateLookOrientation();
@@ -107,5 +108,5 @@ public class CompositeCamera : AbstractCamera {
 			cameras[currentCamera].UpdateLookOrientation();
 			transform.rotation = cameras[currentCamera].transform.rotation;
 		}
-	}
+	}*/
 }

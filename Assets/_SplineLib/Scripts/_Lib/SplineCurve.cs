@@ -164,7 +164,7 @@ public abstract class SplineCurve {
 		// assertion check
 		for (int i=1;i<mTime.Length;i++){
 			if (mTime[i-1] >= mTime[i]){
-				throw new Exception("Non increasing time parameter");
+				throw new Exception("Non increasing time parameter: {...,"+mTime[i-1] +","+ mTime[i]+",...} length: "+mTime.Length);
 			}
 		}
 		
