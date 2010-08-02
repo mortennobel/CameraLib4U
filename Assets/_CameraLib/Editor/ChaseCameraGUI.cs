@@ -32,7 +32,7 @@ public class ChaseCameraGUI : Editor {
     	EditorGUILayout.EndHorizontal ();
 		
 		EditorGUILayout.BeginHorizontal ();
-    	chaseCamera.targetMinimumRenderingDistance = EditorGUILayout.FloatField("Minimum render distance", chaseCamera.targetMinimumRenderingDistance);
+    	chaseCamera.targetMinimumRenderingDistance = EditorGUILayout.FloatField("Min. distance", chaseCamera.targetMinimumRenderingDistance);
     	EditorGUILayout.EndHorizontal ();
 		
 		

@@ -9,7 +9,6 @@ using System.Collections.Generic;
 /// </summary>
 [RequireComponent (typeof (Collider))]
 public class CameraChangeCollider : MonoBehaviour {
-	public Transform cameraTarget;
 	public CompositeCamera compositeCamera;
 	public int newCamera = 0;
 	private static List<int> cameraStack = new  List<int>();
@@ -22,7 +21,7 @@ public class CameraChangeCollider : MonoBehaviour {
 	}
 	
 	void OnTriggerEnter(Collider other) {
-		if (other.transform==cameraTarget){
+		if (other.transform==compositeCamera.GetTarget()){
 			int oldCamera = compositeCamera.currentCamera;
 			cameraStack.Add(oldCamera);
 			compositeCamera.SetCamera(newCamera, interpolationTime);
@@ -30,11 +29,11 @@ public class CameraChangeCollider : MonoBehaviour {
 	}
 	
 	void OnTriggerExit(Collider other) {
-		if (other.transform==cameraTarget){
-			if (cameraStack[cameraStack.Count-1] == newCamera){
+		if (other.transform==compositeCamera.GetTarget()){
+			if (compositeCamera.currentCamera == newCamera){
 				// if current camera, then pop
-				cameraStack.RemoveAt(cameraStack.Count-1);
 				compositeCamera.SetCamera(cameraStack[cameraStack.Count-1], interpolationTime);
+				cameraStack.RemoveAt(cameraStack.Count-1);
 			} else {
 				int lastIndex = cameraStack.LastIndexOf(newCamera);
 				if (lastIndex>-1){

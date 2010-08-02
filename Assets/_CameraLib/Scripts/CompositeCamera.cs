@@ -20,12 +20,8 @@ public class CompositeCamera : AbstractCamera {
 	public AnimationCurve curve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 1));
 	
 	public override void SetTarget(Transform target){
-		this.target = target;
+		base.SetTarget(target);
 		cameras[currentCamera].SetTarget(target);
-	}
-	
-	public override Transform GetTarget(){
-		return null;
 	}
 	
 	public override void InitCamera(){
