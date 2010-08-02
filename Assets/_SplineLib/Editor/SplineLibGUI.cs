@@ -68,7 +68,7 @@ public class SplineLibGUI : Editor {
 		EditorGUILayout.EndHorizontal ();
 					
 		EditorGUILayout.BeginHorizontal();
-    	EditorGUILayout.LabelField("Spline length",splineComponent.GetSplineObject().totalTime.ToString());
+    	EditorGUILayout.LabelField("Spline length",splineComponent.GetSplineObject().totalLength.ToString());
     	EditorGUILayout.EndHorizontal();
 		
 		EditorGUILayout.BeginHorizontal();
