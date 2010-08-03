@@ -126,7 +126,7 @@ public class ChaseCamera : AbstractCamera {
 				
 			}
 		} else {
-			if (cameraType==ChaseCameraType.LooseAllowMovementUnderCamra){
+			if (cameraType==ChaseCameraType.LooseAllowMovementUnderCamera){
 				Vector3 displacement = transform.position-target.position;
 				if (displacement.sqrMagnitude < distance*distance){
 					return lastCameraTargetPosition;
