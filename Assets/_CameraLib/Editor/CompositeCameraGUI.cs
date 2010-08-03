@@ -21,11 +21,15 @@ public class CompositeCameraGUI : Editor {
 		
 		camerasFoldout = EditorGUILayout.Foldout(camerasFoldout, "Cameras");
 		if (camerasFoldout){
+			if (compositeCamera.cameras==null){
+				compositeCamera.cameras = new AbstractCamera[0];
+			}
 			EditorGUILayout.BeginHorizontal ();
 			string sp = "    ";
 			int newSize = EditorGUILayout.IntField(sp+"Size",compositeCamera.cameras.Length);
     		EditorGUILayout.EndHorizontal ();
     		 
+			
 			if (newSize != compositeCamera.cameras.Length){
 				AbstractCamera[] newArray = new AbstractCamera[newSize];
 				Array.Copy(compositeCamera.cameras, newArray, Math.Min(newSize, compositeCamera.cameras.Length));
