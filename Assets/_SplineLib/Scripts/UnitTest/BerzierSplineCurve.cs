@@ -124,7 +124,20 @@ public class BerzierSplineCurve : UUnitTestCase {
 		bezier.Init(p1); 
 		Vector3 vel0 =bezier.GetVelocity(0);
 		Vector3 vel1 =bezier.GetVelocity(1);
-		Assert.True(Vector3.Dot(vel0,vel1)>0, "Vectors should not point in reverse directions");
-		
+		Assert.True(Vector3.Dot(vel0,vel1)>0, "Vectors should not point in reverse directions");	
+	}
+	
+	public void TestLengthPositionInAnNonuniformSpline(){
+		Vector3[] p1 = {
+			new Vector3(0,0,0),
+			new Vector3(0,1,0),
+			new Vector3(0,1,0),
+			new Vector3(0,1,0)
+		};
+		float[] fs = {0f,1f};
+		BezierSplineCurve bezier = new BezierSplineCurve();
+		bezier.Init(p1,fs);
+		Vector3 midPoint = bezier.GetPositionByLength(0.5f);
+		Assert.Equals(0.5f,midPoint.magnitude,0.001f);
 	}
 }

@@ -73,7 +73,7 @@ public abstract class SplineCurve {
 		if (renderPoints.Count==0){
 			renderPoints.Add(0f);
 			for (int i=0;i<mTime.Length-1;i++){
-				calcRenderPoints(mTime[i], mTime[i+1], 0, MAX_RECURSION_DEPTH);
+				CalcRenderPoints(mTime[i], mTime[i+1], 0, MAX_RECURSION_DEPTH);
 			}
 		}
 		return renderPoints.ToArray();
@@ -223,7 +223,7 @@ public abstract class SplineCurve {
 		float quarter = half * 0.5f;
 		Vector3 quarterPoint = GetPosition(u1+quarter);
 		
-		if (IsStraight(p1,midPoint,p2,epsilon) && IsStraight(p1,quarterPoint,midPoint,epsilon)){
+		if (IsStraight(p1,midPoint,p2,epsilon,true) && IsStraight(p1,quarterPoint,midPoint,epsilon,false)){
 			float totalLength = initLength+p1p2Length;
 			res.Add(new ParameterValueToArcLength(u2,totalLength));
 			return totalLength;	  
@@ -238,7 +238,7 @@ public abstract class SplineCurve {
 	/// Calculates the render points.
 	/// Basically same algorithm as segment length
 	/// </summary>
-	private void calcRenderPoints (float u1, float u2, float epsilon, int max){
+	private void CalcRenderPoints (float u1, float u2, float epsilon, int max){
 		Vector3 p1 = GetPosition(u1);
 		Vector3 p2 = GetPosition(u2);
 		Vector3 p1p2 = p2-p1;
@@ -259,14 +259,14 @@ public abstract class SplineCurve {
 		float quarter = half * 0.5f;
 		Vector3 quarterPoint = GetPosition(u1+quarter);
 		
-		if (IsStraight(p1,midPoint,p2,epsilon) && IsStraight(p1,quarterPoint,midPoint,epsilon)){
+		if (IsStraight(p1,midPoint,p2,epsilon,false) && IsStraight(p1,quarterPoint,midPoint,epsilon,false)){
 			renderPoints.Add(u2);
 			return;	  
 		}
 		max --;
 		
-		calcRenderPoints(u1, u1+half, epsilon, max-1);
-		calcRenderPoints(u1+half, u2, epsilon, max-1);
+		CalcRenderPoints(u1, u1+half, epsilon, max-1);
+		CalcRenderPoints(u1+half, u2, epsilon, max-1);
 	}
 	
 	
@@ -277,10 +277,13 @@ public abstract class SplineCurve {
 	/// The main performance gain is that the same magnitude of the same vectors 
 	/// are calculated twice. (SegmentArcLength's p1p2 and p1-midpoint)
 	/// </summary>
-	private bool IsStraight(Vector3 p1, Vector3 p2, Vector3 p3, float epsilon){
+	private bool IsStraight(Vector3 p1, Vector3 p2, Vector3 p3, float epsilon, bool checkMidpointLength){
 		float p1p3Length = (p1-p3).magnitude;
 		float p1p2Length = (p1-p2).magnitude;
 		float p2p3Length = (p2-p3).magnitude;
+		if (checkMidpointLength && Mathf.Abs(p1p3Length*0.5f - p1p2Length) >epsilon){
+			return false;
+		}
 		return p1p2Length+p2p3Length-p1p3Length<=epsilon;
 	}
 }
