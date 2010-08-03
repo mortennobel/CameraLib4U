@@ -110,4 +110,35 @@ public class LinearTest : UUnitTestCase {
 		Assert.Equals(1f, renderPoints[1]);
 		Assert.Equals(2f, renderPoints[2]);
 	}
+	
+		
+	public void TestRenderingPointsBug(){
+		// test bug with renderingpoints being too long
+		Vector3[] p1 = {
+			new Vector3(0,0,0),
+			new Vector3(1,0,0),
+			new Vector3(2,0,0),
+			new Vector3(3,0,0),
+			
+		};
+		float[] floats = {
+			1,2,3,4
+		};
+		LinearSplineCurve lp = new LinearSplineCurve();
+		lp.Init(p1,floats);
+		
+		float[] renderPoints = lp.GetRenderPoints();
+		Vector3[] vs = new Vector3[renderPoints.Length];
+		for (int i=0;i<renderPoints.Length;i++){
+			vs[i] = lp.GetPosition(renderPoints[i]);
+		}
+		string renderPointsStr = "Renderpoints (linear)";
+		for (int i=1;i<vs.Length;i++){
+			float length = (vs[i-1]-vs[i]).magnitude;
+			Assert.Equals(1.0f, length, "Index "+i);
+			renderPointsStr += vs[i-1]+" - "+vs[i]+"\n"; 
+		}	
+		Debug.Log(renderPointsStr);
+		Assert.Equals(4, renderPoints.Length);
+	}
 }

@@ -66,7 +66,11 @@ public class PathBoundCamera : AbstractCamera {
 	/// </summary>
 	public override void InitCamera(){
 		if (cameraSplineObject==null){
-			this.cameraSplineObject = cameraSpline.GetSplineObject();
+			if (cameraSpline==null){
+				Debug.Log("cameraSpline is null for "+name);
+			} else {
+				this.cameraSplineObject = cameraSpline.GetSplineObject();
+			}
 		}
 		if (maxDistanceToJumpCut<=maxDistanceToTarget){
 			Debug.LogWarning("maxDistanceToJumpCut should be larger than maxDistanceToTarget");

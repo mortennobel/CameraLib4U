@@ -99,7 +99,7 @@ public class SplineComponent : MonoBehaviour {
 		// hack to make the editor update the obejct
 		Vector3 p = transform.position;
 		transform.position = Vector3.zero;
-		if (p.magnitude>0){
+		if (p.sqrMagnitude > 0){
 			transform.position = p;
 		}
 		
@@ -108,27 +108,22 @@ public class SplineComponent : MonoBehaviour {
 	
 	private void DrawGizmo(){
 		Gizmos.color = controlPointColor;
-		string debug = "";
 		for (int i=0;i<transform.childCount;i++){
 			ControlPointComponent splineComponent = transform.GetChild(i).gameObject.GetComponent<ControlPointComponent>();
 			if (splineComponent!=null){
 				Gizmos.DrawSphere(splineComponent.position, sphereRadius);
-				debug+=splineComponent.name+" "; 
 			}
 		}
-		Debug.Log(debug);
 		
-		// todo only call when updates 
+		// only call when updates 
 		if (!updated || spline ==null){
 			DoUpdateSpline();
 		}
 		
 		float[] fs = spline.GetRenderPoints();
 		Vector3[] vs = new Vector3[fs.Length];
-		string renderpoints = "";
 		for (int i=0;i<fs.Length;i++){
 			vs[i] = spline.GetPosition(fs[i]);
-			renderpoints += fs[i]+" ";
 		}
 		for (int i=1;i<vs.Length;i++){
 			Gizmos.color = splineColor;
