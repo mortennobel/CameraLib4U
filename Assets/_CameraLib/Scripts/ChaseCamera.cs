@@ -8,7 +8,7 @@ public class ChaseCamera : AbstractCamera {
 	public float cameraPitch = 0;
 	public float distance = 3;
 	
-	public enum ChaseCameraType { Loose, LooseAllowMovementUnderCamra,StayBehind };
+	public enum ChaseCameraType { Loose, LooseAllowMovementUnderCamera,StayBehind };
 	
 	public ChaseCameraType cameraType = ChaseCameraType.StayBehind;
 	
