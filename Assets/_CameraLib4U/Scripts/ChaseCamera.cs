@@ -13,7 +13,7 @@ public class ChaseCamera : AbstractCamera {
 	public ChaseCameraType cameraType = ChaseCameraType.StayBehind;
 	
 	private Vector3 lastCameraTargetPosition = Vector3.zero;
-	public Vector3 idealSpherical = new Vector3();
+	public SphericalCoordinates idealSpherical = new SphericalCoordinates();
 	
 	private Vector3 desiredPosition = Vector3.zero;
 	
@@ -67,8 +67,8 @@ public class ChaseCamera : AbstractCamera {
 	} 
 	
 	private void UpdateIdealSpherical(){
-		idealSpherical.x = distance;
-		idealSpherical.z = cameraPitch;// Mathf.Asin(cameraHeight/distance);
+		idealSpherical.radius = distance;
+		idealSpherical.elevation = cameraPitch;// Mathf.Asin(cameraHeight/distance);
 	}
 	
 	public float GetCameraHeight(){
@@ -112,17 +112,17 @@ public class ChaseCamera : AbstractCamera {
 		
 		if (cameraType==ChaseCameraType.StayBehind){
 			Vector3 rotation = target.transform.rotation.eulerAngles;
-			idealSpherical.y = -rotation.y*Mathf.Deg2Rad-(Mathf.PI*0.5f);
+			idealSpherical.polar = -rotation.y*Mathf.Deg2Rad-(Mathf.PI*0.5f);
 			if (lookHorizontalSpringDamped){
 				lookHorizontalActual = Damping.SpringDamping(lookHorizontalActual,lookHorizontal, ref lookHorizontalVelocity,
 					lookHorizontalSpringStiffness,lookHorizontalSpringDamping);
-				idealSpherical.y += lookHorizontalActual*(Mathf.PI*0.99f);
+				idealSpherical.polar += lookHorizontalActual*(Mathf.PI*0.99f);
 			}
 			if (lookVerticalSpringDamped){
 				lookVerticalActual = Damping.SpringDamping(lookVerticalActual,lookVertical, ref lookVerticalVelocity,
 					lookVerticalSpringStiffness,lookVerticalSpringDamping);
 				
-				idealSpherical.z = Mathf.Clamp(cameraPitch+lookVerticalActual*Mathf.PI, -Mathf.PI*0.45f, Mathf.PI*0.45f);
+				idealSpherical.elevation = Mathf.Clamp(cameraPitch+lookVerticalActual*Mathf.PI, -Mathf.PI*0.45f, Mathf.PI*0.45f);
 				
 			}
 		} else {
@@ -132,10 +132,10 @@ public class ChaseCamera : AbstractCamera {
 					return lastCameraTargetPosition;
 				}
 			}
-			idealSpherical.y = Mathf.Atan2(transform.position.z-target.position.z,
+			idealSpherical.polar = Mathf.Atan2(transform.position.z-target.position.z,
 				transform.position.x-target.position.x);
 		}
-		Vector3 direction = Vector3Ext.SphericalToCartesian(idealSpherical);
+		Vector3 direction = idealSpherical.ToCartesian();
 		lastCameraTargetPosition = target.position+direction;
 		if (virtualCameraCollisionTest){
 			raycastCounter++;
@@ -159,18 +159,18 @@ public class ChaseCamera : AbstractCamera {
 				}
 			}
 			
-			float currentDistance = idealSpherical.x;
-			if (newCameraDistance<idealSpherical.x || 
-				newCameraDistance-idealSpherical.x<=Mathf.Epsilon){ // don't damp if target is reached
-				idealSpherical.x = newCameraDistance;
+			float currentDistance = idealSpherical.radius;
+			if (newCameraDistance<currentDistance || 
+				newCameraDistance-currentDistance<=Mathf.Epsilon){ // don't damp if target is reached
+				idealSpherical.radius = newCameraDistance;
 				vccMoveBackVelocity = 0;
 			} else {
-				idealSpherical.x = Damping.SpringDamping(idealSpherical.x, newCameraDistance,ref vccMoveBackVelocity, vccMoveBackSpringStiffness,vccMoveBackSpringDamping);
+				idealSpherical.radius = Damping.SpringDamping(idealSpherical.radius, newCameraDistance,ref vccMoveBackVelocity, vccMoveBackSpringStiffness,vccMoveBackSpringDamping);
 			}
 			
 			// if distance was updated, then recalculate position
-			if (currentDistance != idealSpherical.x){
-				direction = Vector3Ext.SphericalToCartesian(idealSpherical);
+			if (currentDistance != idealSpherical.radius){
+				direction = idealSpherical.ToCartesian();
 				lastCameraTargetPosition = target.position+direction;
 			}
 		}
