@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections;
 
 /// <summary>
@@ -13,7 +14,8 @@ using System.Collections;
 /// 
 /// (From http://en.wikipedia.org/wiki/Spherical_coordinate_system )
 /// </summary>
-public struct SphericalCoordinates  {
+[Serializable]
+public class SphericalCoordinates  {
 	/// <summary>
 	/// the radial distance of that point from a fixed origin.
 	/// Radius must be >= 0
@@ -34,11 +36,9 @@ public struct SphericalCoordinates  {
     /// * Y as up)
 	/// </summary>
 	public Vector3 ToCartesian(){
-		float a = radius * Mathf.Cos(elevation);
-        return new Vector3(
-			a * Mathf.Cos(polar),
-			radius * Mathf.Sin(elevation),
-			a * Mathf.Sin(polar));
+		Vector3 res = new Vector3();
+		SphericalToCartesian(radius, polar, elevation, out res);
+		return res;
 	}
 	
 	/// <summary>
@@ -47,16 +47,36 @@ public struct SphericalCoordinates  {
     /// Polar)
 	/// </summary>
     public static SphericalCoordinates CartesianToSpherical(Vector3 cartCoords) {
-        SphericalCoordinates store = new SphericalCoordinates();
+		SphericalCoordinates store = new SphericalCoordinates();        
+		CartesianToSpherical(cartCoords, out store.radius, out store.polar, out store.elevation);
+		return store;
+    }
+	
+	/// <summary>
+	/// Converts a point from Spherical coordinates to Cartesian (using positive
+    /// * Y as up)
+	/// </summary>
+	public static void SphericalToCartesian(float radius, float polar, float elevation, out Vector3 outCart){
+		float a = radius * Mathf.Cos(elevation);
+        outCart.x = a * Mathf.Cos(polar);
+		outCart.y =	radius * Mathf.Sin(elevation);
+		outCart.z = a * Mathf.Sin(polar);
+	}
+	
+	/// <summary>
+	/// Converts a point from Cartesian coordinates (using positive Y as up) to
+    /// Spherical and stores the results in the store var. (Radius, Azimuth,
+    /// Polar)
+	/// </summary>
+	public static void CartesianToSpherical(Vector3 cartCoords, out float outRadius, out float outPolar, out float outElevation){
 		if (cartCoords.x == 0)
             cartCoords.x = Mathf.Epsilon;
-        store.radius = Mathf.Sqrt((cartCoords.x * cartCoords.x)
+        outRadius = Mathf.Sqrt((cartCoords.x * cartCoords.x)
                         + (cartCoords.y * cartCoords.y)
                         + (cartCoords.z * cartCoords.z));
-        store.polar = Mathf.Atan(cartCoords.z / cartCoords.x);
+        outPolar = Mathf.Atan(cartCoords.z / cartCoords.x);
         if (cartCoords.x < 0)
-	 		store.polar += Mathf.PI;
-        store.elevation = Mathf.Asin(cartCoords.y / store.radius);
-        return store;
-    }
+	 		outPolar += Mathf.PI;
+        outElevation = Mathf.Asin(cartCoords.y / outRadius);
+	}
 }
