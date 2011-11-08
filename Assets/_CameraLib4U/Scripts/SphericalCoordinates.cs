@@ -22,12 +22,12 @@ public class SphericalCoordinates  {
 	/// </summary>
 	public float radius;
 	/// <summary>
-	/// azimuth angle of its orthogonal projection on 
+	/// azimuth angle (in radian) of its orthogonal projection on 
 	/// a reference plane that passes through the origin and is orthogonal to the zenith
 	/// </summary>
 	public float polar;
 	/// <summary>
-	/// elevation angle from the reference plane 
+	/// elevation angle (in radian) from the reference plane 
 	/// </summary>
 	public float elevation;
 	
@@ -54,7 +54,7 @@ public class SphericalCoordinates  {
 	
 	/// <summary>
 	/// Converts a point from Spherical coordinates to Cartesian (using positive
-    /// * Y as up)
+    /// * Y as up). All angles are in radians.
 	/// </summary>
 	public static void SphericalToCartesian(float radius, float polar, float elevation, out Vector3 outCart){
 		float a = radius * Mathf.Cos(elevation);
